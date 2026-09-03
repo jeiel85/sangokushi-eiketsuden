@@ -1,0 +1,39 @@
+
+:root {
+  font-family: 'NeoDunggeunmo', 'DungGeunMo', monospace, sans-serif;
+  color-scheme: dark;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+body, html, #root {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #020617;
+}
+
+/* 고전 코에이 스타일 윈도우 스크롤바 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+::-webkit-scrollbar-thumb {
+  background: #d97706;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #f59e0b;
+}
