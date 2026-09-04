@@ -1,0 +1,165 @@
+{
+  "stageResults": [
+    {
+      "id": 1,
+      "name": "사수관 전투",
+      "note": "서장 개막전 / 관우 화웅",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 2,
+      "name": "호로관 전투",
+      "note": "여포전 / 삼영전여포",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 3,
+      "name": "계교 전투",
+      "note": "제1장 개막 / 조운 합류",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 10,
+      "name": "하비 전투",
+      "note": "여포의 최후 / 하비 수공",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 12,
+      "name": "연주 탈출전",
+      "note": "탈출 미션",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 13,
+      "name": "백마 전투",
+      "note": "제2장 / 관우 안량",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 16,
+      "name": "고성 전투",
+      "note": "삼형제 눈물의 재회",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 19,
+      "name": "박망파 전투",
+      "note": "제갈량 첫 데뷔전 화공",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 22,
+      "name": "당양 장판파 전투 1",
+      "note": "조운 아두 구출",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 23,
+      "name": "당양 장판파 전투 2",
+      "note": "장판교 장비의 일갈",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 24,
+      "name": "적벽 대전",
+      "note": "제3장 / 조조 80만 수군 화공",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 30,
+      "name": "장사 전투",
+      "note": "황충·위연 합류",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 31,
+      "name": "부수관 전투",
+      "note": "제4장 / 서촉 입촉",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 33,
+      "name": "가맹관 전투",
+      "note": "장비 vs 마초 야간 일기토",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 36,
+      "name": "정군산 전투",
+      "note": "황충 하후연 참수",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 39,
+      "name": "번성 전투",
+      "note": "관우 수공 칠군 수몰",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 40,
+      "name": "맥성 구출전",
+      "note": "원작 영걸전 최대 IF 분기",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 42,
+      "name": "이릉 전투",
+      "note": "육손 화계 돌파",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 43,
+      "name": "남만 전투",
+      "note": "종장 / 맹획 칠종칠금",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    },
+    {
+      "id": 46,
+      "name": "업성 최종결전",
+      "note": "조조군 본영 함락 & 400년 한실 부흥 엔딩",
+      "canvasOk": true,
+      "hudOk": true,
+      "cutsceneOk": true
+    }
+  ],
+  "consoleErrors": []
+}
