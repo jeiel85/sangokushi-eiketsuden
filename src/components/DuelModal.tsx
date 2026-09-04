@@ -88,8 +88,21 @@ export const DuelModal: React.FC<DuelModalProps> = ({ duel, onComplete }) => {
             <span className="rounded bg-red-700 px-2.5 py-0.5 text-xs font-bold text-amber-200">일기토</span>
             <span className="font-bold text-lg text-amber-300">건곤일척 1:1 대결!</span>
           </div>
-          <div className="text-sm font-semibold text-slate-400">
-            {phase === 'clashing' ? `격돌 중 (${clashCount}/4합)` : phase === 'ended' ? '승부 결착!' : '장수 대면'}
+          <div className="flex items-center gap-3">
+            {phase !== 'ended' && (
+              <button
+                onClick={() => {
+                  soundManager.playMenuClick();
+                  setPhase('ended');
+                }}
+                className="rounded bg-slate-800 px-2.5 py-0.5 text-xs font-bold text-slate-300 hover:bg-slate-700 active:scale-95 transition"
+              >
+                스킵 ⏩
+              </button>
+            )}
+            <div className="text-sm font-semibold text-slate-400">
+              {phase === 'clashing' ? `격돌 중 (${clashCount}/4합)` : phase === 'ended' ? '승부 결착!' : '장수 대면'}
+            </div>
           </div>
         </div>
 

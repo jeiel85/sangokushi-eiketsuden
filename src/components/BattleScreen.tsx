@@ -69,6 +69,61 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const [floaters, setFloaters] = useState<DamageFloater[]>([]);
   const [effects, setEffects] = useState<AnimationEffect[]>([]);
 
+  // ⚡ 스마트 자동사냥 (Auto-Battle) 상태 및 실시간 Ref
+  const [isAutoBattle, setIsAutoBattle] = useState(false);
+  const [autoSpeed, setAutoSpeed] = useState<1 | 2>(1);
+
+  const isAutoBattleRef = useRef(false);
+  const autoSpeedRef = useRef<1 | 2>(1);
+  const autoBattleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const unitsRef = useRef<BattleUnit[]>(units);
+  const phaseRef = useRef(phase);
+  const stageRef = useRef(stage);
+  const claimedTreasuresRef = useRef(claimedTreasures);
+  const weatherRef = useRef(weather);
+  const currentTurnRef = useRef(currentTurn);
+
+  useEffect(() => {
+    isAutoBattleRef.current = isAutoBattle;
+  }, [isAutoBattle]);
+
+  useEffect(() => {
+    autoSpeedRef.current = autoSpeed;
+  }, [autoSpeed]);
+
+  useEffect(() => {
+    unitsRef.current = units;
+  }, [units]);
+
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
+
+  useEffect(() => {
+    stageRef.current = stage;
+  }, [stage]);
+
+  useEffect(() => {
+    claimedTreasuresRef.current = claimedTreasures;
+  }, [claimedTreasures]);
+
+  useEffect(() => {
+    weatherRef.current = weather;
+  }, [weather]);
+
+  useEffect(() => {
+    currentTurnRef.current = currentTurn;
+  }, [currentTurn]);
+
+  useEffect(() => {
+    return () => {
+      if (autoBattleTimerRef.current) {
+        clearTimeout(autoBattleTimerRef.current);
+        autoBattleTimerRef.current = null;
+      }
+    };
+  }, []);
+
   // 초기 유닛 배치 및 중간 저장 복원
   useEffect(() => {
     soundManager.playBgm('battle');
@@ -237,6 +292,14 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
     const tileX = Math.floor(clickX / rendererRef.current.tileSize);
     const tileY = Math.floor(clickY / rendererRef.current.tileSize);
+
+    // 자동사냥 중 캔버스를 클릭하면 즉시 자동사냥을 일시정지하고 수동 조작으로 복귀!
+    if (isAutoBattleRef.current) {
+      stopAutoBattle();
+      soundManager.playMenuCancel();
+      addFloater(tileX, tileY, '⚡ 자동사냥 일시정지 (수동 전환)', '#f59e0b');
+      return;
+    }
 
     if (phase !== 'player') return;
 
@@ -558,10 +621,21 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     }, 300);
   };
 
+  // ⚡ 스마트 자동사냥 즉시 정지 헬퍼
+  const stopAutoBattle = useCallback(() => {
+    setIsAutoBattle(false);
+    isAutoBattleRef.current = false;
+    if (autoBattleTimerRef.current) {
+      clearTimeout(autoBattleTimerRef.current);
+      autoBattleTimerRef.current = null;
+    }
+  }, []);
+
   // 승패 조건 확인
   const checkVictoryDefeat = useCallback(() => {
-    const status = BattleEngine.checkStageStatus(stage, units, currentTurn);
+    const status = BattleEngine.checkStageStatus(stage, unitsRef.current, currentTurnRef.current);
     if (status === 'victory') {
+      stopAutoBattle();
       soundManager.playBgm('victory');
       if (stage.postBattleDialogue && stage.postBattleDialogue.length > 0) {
         setDialogueCutscene({ mode: 'post', index: 0 });
@@ -569,10 +643,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         setBattleResult('victory');
       }
     } else if (status === 'defeat') {
+      stopAutoBattle();
       soundManager.playMenuCancel();
       setBattleResult('defeat');
     }
-  }, [stage, units, currentTurn]);
+  }, [stage, stopAutoBattle]);
 
   // 일기토 완료 후 콜백
   const handleDuelComplete = () => {
@@ -584,7 +659,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         );
       }
       // 플레이어에게 보너스 경험치 지급
-      const playerUnit = units.find((u) => u.charId === activeDuel.playerCharId);
+      const playerUnit = unitsRef.current.find((u) => u.charId === activeDuel.playerCharId);
       if (playerUnit) {
         BattleEngine.applyExp(playerUnit, activeDuel.rewardExp);
         addFloater(playerUnit.x, playerUnit.y, `EXP +${activeDuel.rewardExp}`, '#3b82f6');
@@ -592,6 +667,270 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     }
     setActiveDuel(null);
     checkVictoryDefeat();
+
+    if (isAutoBattleRef.current) {
+      setTimeout(() => {
+        if (isAutoBattleRef.current && phaseRef.current === 'player') {
+          runAutoBattleStep();
+        }
+      }, 500);
+    }
+  };
+
+  // ⚡ 스마트 자동사냥 1회 행동 스텝 실행 루프
+  const runAutoBattleStep = () => {
+    if (!isAutoBattleRef.current) return;
+    if (phaseRef.current !== 'player') return;
+    if (dialogueCutscene || activeDuel || battleResult) {
+      stopAutoBattle();
+      return;
+    }
+
+    const currentUnits = unitsRef.current;
+    const currentStage = stageRef.current;
+    const livingPlayers = currentUnits.filter((u) => u.faction === 'player' && u.curHp > 0);
+    const unactedPlayers = livingPlayers.filter((u) => !u.hasActed);
+
+    if (unactedPlayers.length === 0) {
+      // 모든 아군 유닛 행동 완료 -> 적군 턴으로 자동 전환!
+      handleEndPlayerPhase();
+      return;
+    }
+
+    const actor = unactedPlayers[0];
+    setSelectedUnitId(actor.uid);
+    setActiveActionMenu(null);
+    setMovableTiles([]);
+    setAttackableTiles([]);
+
+    const action = AIEngine.decidePlayerAutoAction(
+      actor,
+      currentUnits,
+      currentStage.mapData,
+      currentStage,
+      claimedTreasuresRef.current,
+      weatherRef.current
+    );
+
+    const speed = autoSpeedRef.current;
+    const moveDelay = speed === 2 ? 140 : 280;
+    const actionDelay = speed === 2 ? 200 : 420;
+
+    // 1. 유닛 이동 반영
+    let nextFacing: 'up' | 'down' | 'left' | 'right' = actor.facing || 'down';
+    if (action.moveToX > actor.x) nextFacing = 'right';
+    else if (action.moveToX < actor.x) nextFacing = 'left';
+    else if (action.moveToY > actor.y) nextFacing = 'down';
+    else if (action.moveToY < actor.y) nextFacing = 'up';
+
+    actor.x = action.moveToX;
+    actor.y = action.moveToY;
+    actor.facing = nextFacing;
+
+    // 보물 루팅 체크
+    const treasureKey = `${action.moveToX},${action.moveToY}`;
+    const foundTreasure = currentStage.treasures?.find((t) => t.x === action.moveToX && t.y === action.moveToY);
+    if (foundTreasure && !claimedTreasuresRef.current.has(treasureKey)) {
+      setClaimedTreasures((prev) => new Set([...prev, treasureKey]));
+      soundManager.playLevelUp();
+      const itemDef = ITEMS[foundTreasure.itemId];
+      const itemName = itemDef ? itemDef.name : foundTreasure.itemId;
+      addFloater(action.moveToX, action.moveToY, `💎 [${itemName}] 획득!`, '#3b82f6');
+      if (onLootTreasure) {
+        onLootTreasure(foundTreasure.itemId, 0);
+      }
+    }
+
+    setUnits([...currentUnits]);
+
+    // 2. 이동 완료 후 행동 실행
+    autoBattleTimerRef.current = setTimeout(() => {
+      if (!isAutoBattleRef.current) return;
+
+      if (action.actionType === 'attack' && action.targetUid) {
+        const defender = currentUnits.find((u) => u.uid === action.targetUid && u.curHp > 0);
+        if (defender) {
+          // 일기토 매칭 확인
+          const duelMatch = currentStage.duels?.find(
+            (d) =>
+              (d.playerCharId === actor.charId && d.enemyCharId === defender.charId) ||
+              (d.playerCharId === defender.charId && d.enemyCharId === actor.charId)
+          );
+
+          if (duelMatch) {
+            stopAutoBattle();
+            setActiveDuel(duelMatch);
+            return;
+          }
+
+          const defTerrain = currentStage.mapData[defender.y][defender.x];
+          const result = BattleEngine.executeAttack(actor, defender, defTerrain);
+
+          soundManager.playAttackSlash();
+          addEffect(defender.x, defender.y, 'slash');
+
+          setTimeout(() => {
+            soundManager.playHitImpact();
+            if (result.isCritical) {
+              soundManager.playCriticalHit();
+              addFloater(defender.x, defender.y, `-${result.damage} (회심의 일격!)`, '#fbbf24');
+            } else {
+              addFloater(defender.x, defender.y, `-${result.damage}`, '#ef4444');
+            }
+
+            if (result.isKilled) {
+              soundManager.playUnitRetreat();
+              addFloater(defender.x, defender.y, `[${defender.name}] 퇴각!`, '#f97316');
+            }
+
+            if (result.isLevelUp) {
+              soundManager.playLevelUp();
+              addFloater(actor.x, actor.y, '⭐ 레벨업!', '#3b82f6');
+            }
+
+            if (result.counterDamage !== undefined) {
+              setTimeout(() => {
+                soundManager.playAttackSlash();
+                addEffect(actor.x, actor.y, 'slash');
+                soundManager.playHitImpact();
+                addFloater(actor.x, actor.y, `-${result.counterDamage}`, '#f97316');
+              }, speed === 2 ? 120 : 250);
+            }
+
+            actor.hasActed = true;
+            setUnits([...currentUnits]);
+            setSelectedUnitId(null);
+            checkVictoryDefeat();
+
+            autoBattleTimerRef.current = setTimeout(() => {
+              if (isAutoBattleRef.current) {
+                runAutoBattleStep();
+              }
+            }, actionDelay);
+          }, speed === 2 ? 140 : 250);
+          return;
+        }
+      } else if (action.actionType === 'tactic' && action.targetUid && action.tacticId) {
+        const target = currentUnits.find((u) => u.uid === action.targetUid && u.curHp > 0);
+        if (target) {
+          const targetTerrain = currentStage.mapData[target.y][target.x];
+          const res = BattleEngine.executeTactic(actor, target, action.tacticId, targetTerrain, weatherRef.current);
+
+          const tactic = TACTICS[action.tacticId];
+          if (tactic?.category === 'fire') {
+            soundManager.playMagicFire();
+            addEffect(target.x, target.y, 'fire');
+          } else if (tactic?.category === 'water') {
+            soundManager.playMagicWater();
+            addEffect(target.x, target.y, 'water');
+          } else if (tactic?.category === 'recovery') {
+            soundManager.playMagicHeal();
+            addEffect(target.x, target.y, 'heal');
+          } else if (tactic?.category === 'support') {
+            soundManager.playCheerMorale();
+            addEffect(target.x, target.y, 'heal');
+          }
+
+          setTimeout(() => {
+            addFloater(
+              target.x,
+              target.y,
+              res.message,
+              tactic?.effectType === 'heal' ? '#22c55e' : '#f59e0b'
+            );
+
+            if (res.isLevelUp) {
+              soundManager.playLevelUp();
+              addFloater(actor.x, actor.y, '⭐ 레벨업!', '#3b82f6');
+            }
+
+            actor.hasActed = true;
+            setUnits([...currentUnits]);
+            setSelectedUnitId(null);
+            checkVictoryDefeat();
+
+            autoBattleTimerRef.current = setTimeout(() => {
+              if (isAutoBattleRef.current) {
+                runAutoBattleStep();
+              }
+            }, actionDelay);
+          }, speed === 2 ? 150 : 280);
+          return;
+        }
+      } else if (action.actionType === 'item' && action.targetUid && action.itemIndex !== undefined) {
+        const target = currentUnits.find((u) => u.uid === action.targetUid && u.curHp > 0);
+        if (target) {
+          const itemId = actor.equippedItems[action.itemIndex];
+          const item = ITEMS[itemId];
+          if (item) {
+            soundManager.playMagicHeal();
+            addEffect(target.x, target.y, 'heal');
+
+            if (item.hpRestore) {
+              const prevHp = target.curHp;
+              target.curHp = Math.min(target.maxHp, target.curHp + item.hpRestore);
+              const diff = target.curHp - prevHp;
+              addFloater(target.x, target.y, `+${diff} (HP 회복)`, '#22c55e');
+            }
+            if (item.mpRestore) {
+              const prevMp = target.curMp;
+              target.curMp = Math.min(target.maxMp, target.curMp + item.mpRestore);
+              const diff = target.curMp - prevMp;
+              addFloater(target.x, target.y, `+${diff} (MP 회복)`, '#38bdf8');
+            }
+            if (item.cureStatus) {
+              target.status = 'normal';
+              addFloater(target.x, target.y, '상태 정상화!', '#22c55e');
+            }
+
+            actor.equippedItems.splice(action.itemIndex, 1);
+            BattleEngine.applyExp(actor, 8);
+          }
+        }
+        actor.hasActed = true;
+        setUnits([...currentUnits]);
+        setSelectedUnitId(null);
+        checkVictoryDefeat();
+
+        autoBattleTimerRef.current = setTimeout(() => {
+          if (isAutoBattleRef.current) {
+            runAutoBattleStep();
+          }
+        }, actionDelay);
+        return;
+      }
+
+      // 대기(wait)
+      actor.hasActed = true;
+      setUnits([...currentUnits]);
+      setSelectedUnitId(null);
+      checkVictoryDefeat();
+
+      autoBattleTimerRef.current = setTimeout(() => {
+        if (isAutoBattleRef.current) {
+          runAutoBattleStep();
+        }
+      }, actionDelay);
+    }, moveDelay);
+  };
+
+  // ⚡ 자동사냥 ON/OFF 토글
+  const handleToggleAutoBattle = () => {
+    if (isAutoBattle) {
+      stopAutoBattle();
+      soundManager.playMenuCancel();
+      addFloater(Math.floor(stage.width / 2), Math.floor(stage.height / 2), '⚡ 자동사냥 OFF', '#f59e0b');
+    } else {
+      soundManager.playMenuClick();
+      setIsAutoBattle(true);
+      isAutoBattleRef.current = true;
+      addFloater(Math.floor(stage.width / 2), Math.floor(stage.height / 2), '⚡ 자동사냥 ON!', '#22c55e');
+      if (phaseRef.current === 'player') {
+        setTimeout(() => {
+          runAutoBattleStep();
+        }, 150);
+      }
+    }
   };
 
   // 아군 턴 종료 및 적군 턴 시작
@@ -602,23 +941,26 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     setAttackableTiles([]);
     setActiveActionMenu(null);
     setPhase('enemy');
+    phaseRef.current = 'enemy';
 
     // 적군 AI 행동 순차 실행
     setTimeout(() => {
       executeEnemyTurn();
-    }, 800);
+    }, autoSpeedRef.current === 2 ? 350 : 800);
   };
 
   // 적군 AI 턴 순차 실행
   const executeEnemyTurn = () => {
-    const livingEnemies = units.filter((u) => u.faction === 'enemy' && u.curHp > 0);
+    const livingEnemies = unitsRef.current.filter((u) => u.faction === 'enemy' && u.curHp > 0);
 
     let idx = 0;
     const executeNextEnemy = () => {
       if (idx >= livingEnemies.length) {
         // 적군 턴 완료: 다시 아군 턴으로 전환
         setCurrentTurn((prev) => prev + 1);
+        currentTurnRef.current += 1;
         setPhase('player');
+        phaseRef.current = 'player';
 
         // 날씨 변동 시스템 (75% 맑음, 15% 흐림, 10% 비)
         const randWeather = Math.random();
@@ -654,18 +996,27 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
           return next;
         });
+
+        // 자동사냥 유지 중이면 다음 턴 플레이어 자동행동 개시
+        if (isAutoBattleRef.current) {
+          setTimeout(() => {
+            if (isAutoBattleRef.current && phaseRef.current === 'player') {
+              runAutoBattleStep();
+            }
+          }, autoSpeedRef.current === 2 ? 300 : 600);
+        }
         return;
       }
 
       const enemy = livingEnemies[idx];
-      const action = AIEngine.decideUnitAction(enemy, units, stage.mapData);
+      const action = AIEngine.decideUnitAction(enemy, unitsRef.current, stage.mapData);
 
       // 적 이동 반영
       enemy.x = action.moveToX;
       enemy.y = action.moveToY;
 
       if (action.actionType === 'attack' && action.targetUid) {
-        const target = units.find((u) => u.uid === action.targetUid && u.curHp > 0);
+        const target = unitsRef.current.find((u) => u.uid === action.targetUid && u.curHp > 0);
         if (target) {
           const targetTerrain = stage.mapData[target.y][target.x];
           const result = BattleEngine.executeAttack(enemy, target, targetTerrain);
@@ -675,13 +1026,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           setTimeout(() => {
             soundManager.playHitImpact();
             addFloater(target.x, target.y, `-${result.damage}`, '#ef4444');
-            setUnits([...units]);
-          }, 300);
+            setUnits([...unitsRef.current]);
+          }, autoSpeedRef.current === 2 ? 150 : 300);
         }
       }
 
       idx++;
-      setTimeout(executeNextEnemy, 700);
+      setTimeout(executeNextEnemy, autoSpeedRef.current === 2 ? 300 : 700);
     };
 
     executeNextEnemy();
@@ -721,7 +1072,33 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          {phase === 'player' && (
+          {/* 배속 토글 버튼 */}
+          <button
+            onClick={() => setAutoSpeed((prev) => (prev === 1 ? 2 : 1))}
+            className={`rounded px-2.5 py-1 text-xs font-bold border transition shadow active:scale-95 ${
+              autoSpeed === 2
+                ? 'bg-amber-500 text-slate-950 border-amber-300 font-black scale-105'
+                : 'bg-slate-800 text-slate-300 border-slate-600 hover:bg-slate-700'
+            }`}
+            title="자동사냥 및 전투 연출 배속 토글"
+          >
+            ⏩ {autoSpeed}x 배속
+          </button>
+
+          {/* 자동사냥 ON/OFF 토글 버튼 */}
+          <button
+            onClick={handleToggleAutoBattle}
+            className={`rounded px-3 py-1 text-xs font-bold border transition shadow flex items-center gap-1.5 active:scale-95 ${
+              isAutoBattle
+                ? 'bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-500 text-slate-950 font-black border-yellow-200 shadow-[0_0_15px_rgba(234,179,8,0.8)] animate-pulse'
+                : 'bg-slate-900 border-amber-500/70 text-amber-300 hover:bg-amber-950/80 hover:border-amber-400'
+            }`}
+          >
+            <span>⚡</span>
+            <span>{isAutoBattle ? '자동사냥 ON' : '자동사냥 OFF'}</span>
+          </button>
+
+          {phase === 'player' && !isAutoBattle && (
             <>
               <button
                 onClick={handleSaveBattleState}
@@ -739,6 +1116,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           )}
           <button
             onClick={() => {
+              stopAutoBattle();
               soundManager.playMenuCancel();
               onRetreat();
             }}
@@ -751,6 +1129,15 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
       {/* 중앙 메인 캔버스 전장 맵 */}
       <div className="relative my-auto flex items-center justify-center overflow-auto p-1">
+        {/* 자동사냥 활성화 뱃지 */}
+        {isAutoBattle && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
+            <div className="flex items-center gap-2 rounded-full border-2 border-yellow-400/90 bg-slate-950/90 px-4 py-1.5 text-xs font-black text-yellow-300 shadow-2xl backdrop-blur animate-pulse">
+              <span className="inline-block h-2.5 w-2.5 rounded-full bg-yellow-400 animate-ping" />
+              <span>⚡ [스마트 자동사냥] 가동 중 ({autoSpeed}x) • 전장 클릭 시 즉시 수동 복귀</span>
+            </div>
+          </div>
+        )}
         <canvas
           ref={canvasRef}
           width={stage.width * 48}
