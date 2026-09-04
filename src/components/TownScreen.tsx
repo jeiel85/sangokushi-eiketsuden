@@ -13,6 +13,7 @@ interface TownScreenProps {
   onOpenDeployment: () => void;
   onOpenUnitDetail: (unit: BattleUnit) => void;
   onOpenStageSelect: () => void;
+  onOpenChronicle: () => void;
   onSaveGame: () => void;
 }
 
@@ -24,6 +25,7 @@ export const TownScreen: React.FC<TownScreenProps> = ({
   onOpenDeployment,
   onOpenUnitDetail,
   onOpenStageSelect,
+  onOpenChronicle,
   onSaveGame
 }) => {
   const [selectedDialogueHero, setSelectedDialogueHero] = useState<string>('liu_bei');
@@ -217,6 +219,16 @@ export const TownScreen: React.FC<TownScreenProps> = ({
           className="rounded border border-blue-600 bg-blue-950/50 px-5 py-2.5 text-sm font-bold text-blue-300 hover:bg-blue-900/60 active:scale-95 transition"
         >
           장수 정보 / 군비 📜
+        </button>
+
+        <button
+          onClick={() => {
+            soundManager.playMenuClick();
+            onOpenChronicle();
+          }}
+          className="rounded border border-emerald-600 bg-emerald-950/60 px-5 py-2.5 text-sm font-bold text-emerald-300 hover:bg-emerald-900/60 active:scale-95 transition"
+        >
+          삼국지 연대기 📖
         </button>
 
         <button

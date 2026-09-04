@@ -8,6 +8,7 @@ interface TitleScreenProps {
   onContinueGame: () => void;
   onContinueBattle?: () => void;
   onOpenStageSelect: () => void;
+  onOpenChronicle?: () => void;
   hasSavedGame: boolean;
   hasBattleSave?: boolean;
   onActivateLevel99Cheat: () => void;
@@ -19,6 +20,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
   onContinueGame,
   onContinueBattle,
   onOpenStageSelect,
+  onOpenChronicle,
   hasSavedGame,
   hasBattleSave,
   onActivateLevel99Cheat,
@@ -159,6 +161,18 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           >
             전 스테이지 선택기 🗺️
           </button>
+
+          {onOpenChronicle && (
+            <button
+              onClick={() => {
+                soundManager.playMenuClick();
+                onOpenChronicle();
+              }}
+              className="rounded border border-emerald-600 bg-emerald-950/70 px-6 py-2.5 text-sm font-bold text-emerald-300 hover:bg-emerald-900/80 active:scale-95 transition shadow"
+            >
+              삼국지 영걸전 대하 연대기 📖
+            </button>
+          )}
         </div>
       </div>
 

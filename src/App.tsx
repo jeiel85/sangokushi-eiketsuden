@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { BattleScreen } from './components/BattleScreen';
+import { ChronicleModal } from './components/ChronicleModal';
 import { DeploymentModal } from './components/DeploymentModal';
 import { EquipModal } from './components/EquipModal';
+import { PrologueModal } from './components/PrologueModal';
 import { ShopModal } from './components/ShopModal';
 import { StageSelectModal } from './components/StageSelectModal';
 import { TitleScreen } from './components/TitleScreen';
@@ -185,6 +187,8 @@ export function App() {
   const [isEquipOpen, setIsEquipOpen] = useState(false);
   const [isDeploymentOpen, setIsDeploymentOpen] = useState(false);
   const [isStageSelectOpen, setIsStageSelectOpen] = useState(false);
+  const [isPrologueOpen, setIsPrologueOpen] = useState(false);
+  const [isChronicleOpen, setIsChronicleOpen] = useState(false);
   const [inspectUnit, setInspectUnit] = useState<BattleUnit | null>(null);
 
   // 로컬 저장 데이터 확인
@@ -241,15 +245,14 @@ export function App() {
     }
   };
 
-  // 새 게임 시작
+  // 새 게임 시작 (도원결의 오프닝 프롤로그 재생)
   const handleStartNewGame = () => {
     const initial = createInitialGameState();
     if (gameState.isCheatedLevel99) {
       applyLevel99ToState(initial);
     }
     setGameState(initial);
-    setScreenMode('town');
-    soundManager.playBgm('town');
+    setIsPrologueOpen(true);
   };
 
   // 전설의 유비 얼굴 연타 레벨 99 치트키 발동!
@@ -442,6 +445,7 @@ export function App() {
           onContinueGame={handleContinueGame}
           onContinueBattle={handleContinueBattle}
           onOpenStageSelect={() => setIsStageSelectOpen(true)}
+          onOpenChronicle={() => setIsChronicleOpen(true)}
           hasSavedGame={hasSavedGame}
           hasBattleSave={hasBattleSave}
           onActivateLevel99Cheat={handleActivateLevel99Cheat}
@@ -459,6 +463,7 @@ export function App() {
           onOpenDeployment={() => setIsDeploymentOpen(true)}
           onOpenUnitDetail={(unit) => setInspectUnit(unit)}
           onOpenStageSelect={() => setIsStageSelectOpen(true)}
+          onOpenChronicle={() => setIsChronicleOpen(true)}
           onSaveGame={handleSaveGame}
         />
       )}
@@ -553,6 +558,24 @@ export function App() {
             }));
             setInspectUnit(null);
           }}
+        />
+      )}
+      {/* 도원결의 오프닝 프롤로그 모달 */}
+      {isPrologueOpen && (
+        <PrologueModal
+          onComplete={() => {
+            setIsPrologueOpen(false);
+            setScreenMode('town');
+            soundManager.playBgm('town');
+          }}
+        />
+      )}
+
+      {/* 삼국지 영걸전 대하 연대기 실록 모달 */}
+      {isChronicleOpen && (
+        <ChronicleModal
+          onClose={() => setIsChronicleOpen(false)}
+          currentStageId={gameState.currentStageId}
         />
       )}
     </div>

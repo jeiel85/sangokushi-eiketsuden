@@ -79,6 +79,13 @@ async function runTest() {
     await page.click('button:has-text("새로운 천하 통일 시작")');
     await page.waitForTimeout(600);
 
+    const prologueModal = page.locator('text=도원결의 (桃園結義)');
+    if (await prologueModal.isVisible()) {
+      console.log('🌸 Prologue Cutscene detected! Skipping to Town Screen...');
+      await page.click('button:has-text("스킵 ⏩")');
+      await page.waitForTimeout(400);
+    }
+
     // 2. Town screen -> Open EquipModal (군비 정돈 / 전직)
     console.log('2️⃣ Testing Town Screen & EquipModal...');
     await page.screenshot({ path: path.join(screenshotDir, '02_town_screen.png') });

@@ -9,6 +9,7 @@ import type { AnimationEffect, DamageFloater } from '../core/renderer';
 import { CHARACTERS } from '../data/characters';
 import { TERRAINS, UNIT_CLASSES } from '../data/classes';
 import { ITEMS } from '../data/items';
+import { STAGE_BRIEFINGS } from '../data/storyChronicle';
 import { TACTICS } from '../data/tactics';
 import type { BattleSaveData, BattleUnit, DuelDef, StageDef } from '../types/game';
 import { DuelModal } from './DuelModal';
@@ -1083,6 +1084,19 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
                       스킵 ⏩
                     </button>
                   </div>
+
+                  {/* 시대 연도 및 역사적 정세 브리핑 (전투 개시 시) */}
+                  {dialogueCutscene.mode === 'pre' && STAGE_BRIEFINGS[stage.id] && (
+                    <div className="mb-3 rounded-lg border border-amber-900/60 bg-slate-900/90 p-2.5 text-xs space-y-1">
+                      <div className="flex items-center justify-between text-amber-300 font-bold">
+                        <span>⏳ {STAGE_BRIEFINGS[stage.id].year}</span>
+                        <span>📍 {STAGE_BRIEFINGS[stage.id].location}</span>
+                      </div>
+                      <p className="text-slate-300 text-[11px] leading-relaxed">
+                        {STAGE_BRIEFINGS[stage.id].historicalContext}
+                      </p>
+                    </div>
+                  )}
 
                   <div className="flex items-start gap-4 my-2">
                     <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border-2 border-amber-500 bg-slate-900 text-3xl font-black text-amber-400 shadow-md">
