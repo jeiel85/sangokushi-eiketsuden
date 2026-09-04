@@ -41,6 +41,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const [activeActionMenu, setActiveActionMenu] = useState<'root' | 'tactics' | 'items' | null>(null);
   const [selectedTacticId, setSelectedTacticId] = useState<string | null>(null);
   const [hoveredTile, setHoveredTile] = useState<{ x: number; y: number } | null>(null);
+  const [unitOriginalPos, setUnitOriginalPos] = useState<{ x: number; y: number } | null>(null);
 
   // 일기토 모달
   const [activeDuel, setActiveDuel] = useState<DuelDef | null>(null);
@@ -203,7 +204,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
     if (phase !== 'player') return;
 
-    // 1. 공격 타겟 선택 상태인 경우
+    // 1. 공격 / 책략 타겟 선택 상태인 경우
     if (attackableTiles.length > 0) {
       const isTargetTile = attackableTiles.some((t) => t.x === tileX && t.y === tileY);
       if (isTargetTile) {
@@ -212,26 +213,31 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
         if (attacker && targetUnit) {
           if (selectedTacticId) {
-            // 책략 실행
             handleExecuteTactic(attacker, targetUnit, selectedTacticId);
           } else {
-            // 일반 물리 공격 실행
             handleExecuteAttack(attacker, targetUnit);
           }
+          setUnitOriginalPos(null);
           return;
         }
       }
-      // 공격 취소
+      // 공격 취소 및 메뉴 복귀
+      soundManager.playMenuCancel();
       setAttackableTiles([]);
       setSelectedTacticId(null);
+      setActiveActionMenu('root');
       return;
     }
 
-    // 2. 이동 가능한 타일을 클릭한 경우 (이동 처리)
+    // 2. 이동 가능한 타일을 클릭한 경우 -> 유닛 이동 후 행동 선택 메뉴 표시!
     if (movableTiles.length > 0 && selectedUnitId) {
       const isMoveTile = movableTiles.some((t) => t.x === tileX && t.y === tileY);
       if (isMoveTile) {
         soundManager.playMenuClick();
+        const curUnit = units.find((u) => u.uid === selectedUnitId);
+        if (curUnit) {
+          setUnitOriginalPos({ x: curUnit.x, y: curUnit.y });
+        }
         setUnits((prev) =>
           prev.map((u) => (u.uid === selectedUnitId ? { ...u, x: tileX, y: tileY } : u))
         );
@@ -247,24 +253,59 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     if (clickedUnit) {
       soundManager.playMenuClick();
       if (clickedUnit.faction === 'player' && !clickedUnit.hasActed) {
-        // 행동 가능한 아군 유닛 선택
+        // 행동 가능한 아군 유닛 선택: 이동 가능 범위만 하이라이트하고 메뉴는 띄우지 않음!
         setSelectedUnitId(clickedUnit.uid);
         const tiles = BattleEngine.getMovableTiles(clickedUnit, units, stage.mapData);
         setMovableTiles(tiles);
-        setActiveActionMenu('root');
+        setActiveActionMenu(null);
+        setAttackableTiles([]);
+        setSelectedTacticId(null);
+        setUnitOriginalPos(null);
       } else {
         // 적군 또는 이미 행동한 유닛 정보 표시
         setSelectedUnitId(clickedUnit.uid);
         setMovableTiles([]);
+        setAttackableTiles([]);
         setActiveActionMenu(null);
+        setSelectedTacticId(null);
+        setUnitOriginalPos(null);
       }
     } else {
-      // 빈 타일 클릭: 선택 해제
-      setSelectedUnitId(null);
-      setMovableTiles([]);
-      setAttackableTiles([]);
-      setActiveActionMenu(null);
+      // 빈 타일 클릭 시 선택 해제 (행동 메뉴가 떠 있는 경우 이동 취소)
+      if (activeActionMenu && unitOriginalPos) {
+        handleCancelMove();
+      } else {
+        setSelectedUnitId(null);
+        setMovableTiles([]);
+        setAttackableTiles([]);
+        setActiveActionMenu(null);
+        setSelectedTacticId(null);
+        setUnitOriginalPos(null);
+      }
     }
+  };
+
+  // 이동 취소 (원래 타일로 복귀)
+  const handleCancelMove = () => {
+    soundManager.playMenuCancel();
+    if (selectedUnitId && unitOriginalPos) {
+      setUnits((prev) =>
+        prev.map((u) =>
+          u.uid === selectedUnitId ? { ...u, x: unitOriginalPos.x, y: unitOriginalPos.y } : u
+        )
+      );
+      const unit = units.find((u) => u.uid === selectedUnitId);
+      if (unit) {
+        unit.x = unitOriginalPos.x;
+        unit.y = unitOriginalPos.y;
+        const tiles = BattleEngine.getMovableTiles(unit, units, stage.mapData);
+        setMovableTiles(tiles);
+      }
+    }
+    setActiveActionMenu(null);
+    setAttackableTiles([]);
+    setSelectedTacticId(null);
+    setUnitOriginalPos(null);
   };
 
   // 일반 물리 공격 실행
@@ -533,9 +574,35 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           style={{ imageRendering: 'pixelated' }}
         />
 
-        {/* 액션 명령 메뉴 (이동 후 나타나는 영걸전 스타일 윈도우) */}
+        {/* 공격/책략 타겟 선택 중일 때 상단 취소 버튼 */}
+        {attackableTiles.length > 0 && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40">
+            <button
+              onClick={() => {
+                soundManager.playMenuCancel();
+                setAttackableTiles([]);
+                setSelectedTacticId(null);
+                setActiveActionMenu('root');
+              }}
+              className="rounded-full bg-red-900/90 border-2 border-red-500 px-4 py-1.5 text-xs font-bold text-white shadow-xl hover:bg-red-800 active:scale-95 transition"
+            >
+              ↩️ {selectedTacticId ? '책략 대상 선택 취소' : '공격 대상 선택 취소'}
+            </button>
+          </div>
+        )}
+
+        {/* 액션 명령 메뉴 (이동 후 나타나는 영걸전 스타일 스마트 배치 윈도우) */}
         {activeActionMenu && selectedUnit && (
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-40 rounded-lg border-4 border-amber-600 bg-slate-950/95 p-3 shadow-2xl text-white">
+          <div
+            className="absolute z-40 rounded-lg border-4 border-amber-600 bg-slate-950/95 p-3 shadow-2xl text-white transition-all"
+            style={{
+              left:
+                selectedUnit.x > stage.width / 2
+                  ? Math.max(10, selectedUnit.x * 48 - 170)
+                  : Math.min(stage.width * 48 - 180, (selectedUnit.x + 1) * 48 + 12),
+              top: Math.max(10, Math.min(stage.height * 48 - 260, selectedUnit.y * 48 - 20))
+            }}
+          >
             <div className="mb-2 text-center text-xs font-bold text-amber-300 border-b border-amber-800 pb-1">
               {selectedUnit.name} - 행동 선택
             </div>
@@ -552,6 +619,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
                       stage.width,
                       stage.height
                     );
+                    const hasEnemies = targets.some((t) =>
+                      units.some((u) => u.x === t.x && u.y === t.y && u.faction === 'enemy' && u.curHp > 0)
+                    );
+                    if (!hasEnemies) {
+                      soundManager.playMenuCancel();
+                      addFloater(selectedUnit.x, selectedUnit.y, '사거리 내 적 없음', '#f59e0b');
+                    }
                     setAttackableTiles(targets);
                     setSelectedTacticId(null);
                     setActiveActionMenu(null);
@@ -590,11 +664,24 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
                     setUnits([...units]);
                     setActiveActionMenu(null);
                     setSelectedUnitId(null);
+                    setUnitOriginalPos(null);
                   }}
                   className="rounded bg-slate-800 hover:bg-slate-700 px-3 py-1.5 text-xs font-bold text-white transition"
                 >
                   🛡️ 대기
                 </button>
+
+                {/* 이동 취소 버튼 */}
+                {unitOriginalPos && (
+                  <button
+                    onClick={() => {
+                      handleCancelMove();
+                    }}
+                    className="rounded bg-amber-900/90 hover:bg-amber-800 px-3 py-1.5 text-xs font-bold text-amber-200 transition"
+                  >
+                    ↩️ 이동 취소
+                  </button>
+                )}
 
                 <button
                   onClick={() => {
