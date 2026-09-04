@@ -82,6 +82,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const claimedTreasuresRef = useRef(claimedTreasures);
   const weatherRef = useRef(weather);
   const currentTurnRef = useRef(currentTurn);
+  // 클로저 staleness 방지: handleDuelComplete에서 최신 runAutoBattleStep을 호출하기 위한 ref
+  const runAutoBattleStepRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     isAutoBattleRef.current = isAutoBattle;
@@ -123,6 +125,12 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       }
     };
   }, []);
+
+  // 매 렌더마다 최신 runAutoBattleStep을 ref에 동기화
+  // (handleDuelComplete의 setTimeout에서 stale 클로저 문제 방지)
+  useEffect(() => {
+    runAutoBattleStepRef.current = runAutoBattleStep;
+  });
 
   // 초기 유닛 배치 및 중간 저장 복원
   useEffect(() => {
@@ -671,7 +679,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     if (isAutoBattleRef.current) {
       setTimeout(() => {
         if (isAutoBattleRef.current && phaseRef.current === 'player') {
-          runAutoBattleStep();
+          // ref를 통해 최신 runAutoBattleStep 호출 (stale 클로저 방지)
+          runAutoBattleStepRef.current();
         }
       }, 500);
     }
@@ -758,7 +767,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           );
 
           if (duelMatch) {
-            stopAutoBattle();
+            // 자동사냥은 일기토 후에도 유지 — handleDuelComplete에서 자동 재개
+            actor.hasActed = true;
+            setUnits([...currentUnits]);
             setActiveDuel(duelMatch);
             return;
           }
