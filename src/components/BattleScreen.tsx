@@ -17,6 +17,7 @@ import { UnitDetailModal } from './UnitDetailModal';
 interface BattleScreenProps {
   stage: StageDef;
   playerUnits: BattleUnit[];
+  onLootTreasure?: (itemId: string, gold?: number) => void;
   onVictory: (clearedStageId: number, rewardGold: number, rewardExp: number) => void;
   onDefeat: () => void;
   onRetreat: () => void;
@@ -25,6 +26,7 @@ interface BattleScreenProps {
 export const BattleScreen: React.FC<BattleScreenProps> = ({
   stage,
   playerUnits,
+  onLootTreasure,
   onVictory,
   onDefeat,
   onRetreat
@@ -34,6 +36,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
   const [currentTurn, setCurrentTurn] = useState(1);
   const [phase, setPhase] = useState<'player' | 'enemy'>('player');
+  const [weather, setWeather] = useState<'sunny' | 'rainy' | 'cloudy'>('sunny');
   const [units, setUnits] = useState<BattleUnit[]>([]);
   const [selectedUnitId, setSelectedUnitId] = useState<string | null>(null);
   const [movableTiles, setMovableTiles] = useState<{ x: number; y: number }[]>([]);
@@ -42,6 +45,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const [selectedTacticId, setSelectedTacticId] = useState<string | null>(null);
   const [hoveredTile, setHoveredTile] = useState<{ x: number; y: number } | null>(null);
   const [unitOriginalPos, setUnitOriginalPos] = useState<{ x: number; y: number } | null>(null);
+  const [claimedTreasures, setClaimedTreasures] = useState<Set<string>>(new Set());
+
+  // 스토리 회화 컷씬 모달
+  const [dialogueCutscene, setDialogueCutscene] = useState<{ mode: 'pre' | 'post'; index: number } | null>(null);
 
   // 일기토 모달
   const [activeDuel, setActiveDuel] = useState<DuelDef | null>(null);
@@ -107,6 +114,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     });
 
     setUnits(combinedUnits);
+    setClaimedTreasures(new Set());
+
+    if (stage.preBattleDialogue && stage.preBattleDialogue.length > 0) {
+      setDialogueCutscene({ mode: 'pre', index: 0 });
+    } else {
+      setDialogueCutscene(null);
+    }
   }, [stage, playerUnits]);
 
   // 플로팅 데미지 추가 헬퍼
@@ -235,11 +249,32 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       if (isMoveTile) {
         soundManager.playMenuClick();
         const curUnit = units.find((u) => u.uid === selectedUnitId);
+        let nextFacing: 'up' | 'down' | 'left' | 'right' = curUnit?.facing || 'down';
         if (curUnit) {
+          if (tileX > curUnit.x) nextFacing = 'right';
+          else if (tileX < curUnit.x) nextFacing = 'left';
+          else if (tileY > curUnit.y) nextFacing = 'down';
+          else if (tileY < curUnit.y) nextFacing = 'up';
+
           setUnitOriginalPos({ x: curUnit.x, y: curUnit.y });
         }
+
+        // 보물 상자 / 보물 타일 루팅 체크
+        const treasureKey = `${tileX},${tileY}`;
+        const foundTreasure = stage.treasures?.find((t) => t.x === tileX && t.y === tileY);
+        if (foundTreasure && !claimedTreasures.has(treasureKey)) {
+          setClaimedTreasures((prev) => new Set([...prev, treasureKey]));
+          soundManager.playLevelUp();
+          const itemDef = ITEMS[foundTreasure.itemId];
+          const itemName = itemDef ? itemDef.name : foundTreasure.itemId;
+          addFloater(tileX, tileY, `💎 [${itemName}] 획득!`, '#3b82f6');
+          if (onLootTreasure) {
+            onLootTreasure(foundTreasure.itemId, 0);
+          }
+        }
+
         setUnits((prev) =>
-          prev.map((u) => (u.uid === selectedUnitId ? { ...u, x: tileX, y: tileY } : u))
+          prev.map((u) => (u.uid === selectedUnitId ? { ...u, x: tileX, y: tileY, facing: nextFacing } : u))
         );
         setMovableTiles([]);
         setActiveActionMenu('root');
@@ -365,7 +400,16 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   // 책략 실행
   const handleExecuteTactic = (caster: BattleUnit, target: BattleUnit, tacticId: string) => {
     const targetTerrain = stage.mapData[target.y][target.x];
-    const res = BattleEngine.executeTactic(caster, target, tacticId, targetTerrain);
+    const res = BattleEngine.executeTactic(caster, target, tacticId, targetTerrain, weather);
+
+    if (res.message === '우천으로 화계 불가!') {
+      soundManager.playMenuCancel();
+      addFloater(target.x, target.y, '우천으로 화계 불가!', '#f59e0b');
+      setAttackableTiles([]);
+      setSelectedTacticId(null);
+      setActiveActionMenu('root');
+      return;
+    }
 
     const tactic = TACTICS[tacticId];
     if (tactic?.category === 'fire') {
@@ -408,7 +452,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     const status = BattleEngine.checkStageStatus(stage, units, currentTurn);
     if (status === 'victory') {
       soundManager.playBgm('victory');
-      setBattleResult('victory');
+      if (stage.postBattleDialogue && stage.postBattleDialogue.length > 0) {
+        setDialogueCutscene({ mode: 'post', index: 0 });
+      } else {
+        setBattleResult('victory');
+      }
     } else if (status === 'defeat') {
       soundManager.playMenuCancel();
       setBattleResult('defeat');
@@ -461,6 +509,11 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         setCurrentTurn((prev) => prev + 1);
         setPhase('player');
 
+        // 날씨 변동 시스템 (75% 맑음, 15% 흐림, 10% 비)
+        const randWeather = Math.random();
+        const nextWeather = randWeather < 0.10 ? 'rainy' : randWeather < 0.25 ? 'cloudy' : 'sunny';
+        setWeather(nextWeather);
+
         // 모든 아군 및 적군 행동 플래그 리셋 & 지형 회복 적용
         setUnits((prev) =>
           prev.map((u) => {
@@ -468,6 +521,10 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
             const terrain = stage.mapData[u.y][u.x];
             const healRatio = TERRAINS[terrain]?.healPerTurn || 0;
             const healedHp = Math.min(u.maxHp, u.curHp + Math.round(u.maxHp * healRatio));
+            const diff = healedHp - u.curHp;
+            if (diff > 0) {
+              addFloater(u.x, u.y, `+${diff} (지형)`, '#22c55e');
+            }
             return {
               ...u,
               curHp: healedHp,
@@ -527,6 +584,17 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
             }`}
           >
             {phase === 'player' ? '아군 턴 (PLAYER)' : '적군 턴 (ENEMY)'}
+          </span>
+          <span
+            className={`rounded px-2.5 py-0.5 text-xs font-bold border transition ${
+              weather === 'rainy'
+                ? 'bg-blue-950 border-cyan-400 text-cyan-200 animate-pulse'
+                : weather === 'cloudy'
+                ? 'bg-slate-800 border-slate-600 text-slate-300'
+                : 'bg-amber-950 border-amber-500 text-amber-200'
+            }`}
+          >
+            {weather === 'rainy' ? '🌧️ 폭우 (수계 +25% / 화계 불가)' : weather === 'cloudy' ? '☁️ 흐림' : '☀️ 맑음'}
           </span>
         </div>
 
@@ -837,6 +905,86 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       {/* 장수 상세 정보 모달 */}
       {inspectUnit && (
         <UnitDetailModal unit={inspectUnit} onClose={() => setInspectUnit(null)} />
+      )}
+
+      {/* 스토리 회화 컷씬 모달 (전투 전/후 대사 연출) */}
+      {dialogueCutscene && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-6 backdrop-blur-xs">
+          <div className="relative w-full max-w-2xl rounded-xl border-4 border-amber-600 bg-slate-950/95 p-5 text-white shadow-2xl animate-fade-in">
+            {(() => {
+              const dialogues =
+                dialogueCutscene.mode === 'pre'
+                  ? stage.preBattleDialogue || []
+                  : stage.postBattleDialogue || [];
+              const currentDiag = dialogues[dialogueCutscene.index];
+              if (!currentDiag) return null;
+
+              const isLast = dialogueCutscene.index >= dialogues.length - 1;
+
+              return (
+                <div>
+                  <div className="mb-3 flex items-center justify-between border-b border-amber-800/70 pb-2">
+                    <span className="text-xs font-bold text-amber-400">
+                      {dialogueCutscene.mode === 'pre' ? '📜 전투 개시 회화' : '🏆 승전 보고 회화'} ({dialogueCutscene.index + 1}/{dialogues.length})
+                    </span>
+                    <button
+                      onClick={() => {
+                        soundManager.playMenuClick();
+                        if (dialogueCutscene.mode === 'pre') {
+                          setDialogueCutscene(null);
+                        } else {
+                          setDialogueCutscene(null);
+                          setBattleResult('victory');
+                        }
+                      }}
+                      className="rounded bg-slate-800 px-2.5 py-0.5 text-[11px] font-bold text-slate-300 hover:bg-slate-700 transition"
+                    >
+                      스킵 ⏩
+                    </button>
+                  </div>
+
+                  <div className="flex items-start gap-4 my-2">
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border-2 border-amber-500 bg-slate-900 text-3xl font-black text-amber-400 shadow-md">
+                      {currentDiag.speaker[0]}
+                    </div>
+                    <div className="flex-1 space-y-1.5">
+                      <div className="text-sm font-black text-amber-300">
+                        [{currentDiag.speaker}]
+                      </div>
+                      <p className="text-sm font-medium leading-relaxed text-slate-100 min-h-[48px]">
+                        "{currentDiag.text}"
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      onClick={() => {
+                        soundManager.playMenuClick();
+                        if (isLast) {
+                          if (dialogueCutscene.mode === 'pre') {
+                            setDialogueCutscene(null);
+                          } else {
+                            setDialogueCutscene(null);
+                            setBattleResult('victory');
+                          }
+                        } else {
+                          setDialogueCutscene({
+                            ...dialogueCutscene,
+                            index: dialogueCutscene.index + 1
+                          });
+                        }
+                      }}
+                      className="rounded bg-gradient-to-r from-amber-600 to-yellow-500 px-5 py-1.5 text-xs font-black text-slate-950 hover:from-amber-500 hover:to-yellow-400 active:scale-95 transition shadow"
+                    >
+                      {isLast ? '확인 ↵' : '다음 ▶'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
       )}
 
       {/* 승리 모달 */}

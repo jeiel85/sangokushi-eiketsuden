@@ -1,6 +1,6 @@
 import type { StageDef, TerrainType } from '../types/game';
 
-// 12x10 규격의 맵 생성 헬퍼 함수
+// 12x10 및 14x10 규격의 맵 생성 헬퍼 함수
 function generateMap(pattern: string[]): TerrainType[][] {
   const map: TerrainType[][] = [];
   const charToTerrain: Record<string, TerrainType> = {
@@ -32,7 +32,7 @@ function generateMap(pattern: string[]): TerrainType[][] {
 }
 
 export const STAGES: StageDef[] = [
-  // ==================== 서장: 반동탁 연합군 ====================
+  // 1. 사수관 전투
   {
     id: 1,
     code: 'sishui_pass',
@@ -52,13 +52,13 @@ export const STAGES: StageDef[] = [
       ',..FFF....W#BM',
       'M..FF...WWW#MM',
       'MM...WWWWW.GMM',
-      'MMMMMMMMMMMMMM'
+      'MMMMMMMMMMMMMM',
     ]),
     maxTurns: 30,
     victoryCondition: '화웅 격파 또는 적 전멸',
     defeatCondition: '유비의 퇴각 또는 제한 턴 초과',
     playerDeploymentLimit: 5,
-    requiredPlayerCharIds: ['liu_bei'],
+    requiredPlayerCharIds: ["liu_bei"],
     clearGold: 500,
     clearExpBonus: 50,
     initialDeployments: [
@@ -67,14 +67,12 @@ export const STAGES: StageDef[] = [
       { charId: 'zhang_fei', x: 2, y: 5, faction: 'player' },
       { charId: 'jian_yong', x: 0, y: 4, faction: 'player' },
       { charId: 'fan_gong', x: 1, y: 6, faction: 'player' },
-
-      // 적군
       { charId: 'hua_xiong', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
       { charId: 'li_ru', x: 11, y: 3, faction: 'enemy', aiType: 'hold' },
       { charId: 'deng_mao', x: 7, y: 3, faction: 'enemy', aiType: 'aggressive' },
       { charId: 'cheng_yuanzhi', x: 7, y: 5, faction: 'enemy', aiType: 'aggressive' },
       { charId: 'deng_mao', x: 9, y: 2, faction: 'enemy', aiType: 'aggressive' },
-      { charId: 'cheng_yuanzhi', x: 9, y: 6, faction: 'enemy', aiType: 'aggressive' }
+      { charId: 'cheng_yuanzhi', x: 9, y: 6, faction: 'enemy', aiType: 'aggressive' },
     ],
     duels: [
       {
@@ -83,29 +81,34 @@ export const STAGES: StageDef[] = [
         dialogueLines: [
           { speaker: '화웅', text: '이름 없는 마궁수 따위가 감히 나 화웅에게 덤비다니!' },
           { speaker: '관우', text: '술이 식기 전에 네 놈의 목을 베어 바치겠다!' },
-          { speaker: '화웅', text: '크헉! 이 무슨 괴력인가...!' }
+          { speaker: '화웅', text: '크헉! 이 무슨 괴력인가...!' },
         ],
         winner: 'player',
         rewardExp: 100,
         enemyRetreats: true
-      }
+      },
     ],
     treasures: [
       { x: 12, y: 3, itemId: 'rice' },
-      { x: 12, y: 5, itemId: 'good_medicine' }
+      { x: 12, y: 5, itemId: 'good_medicine' },
     ],
     preBattleDialogue: [
       { speaker: '조조', text: '화웅의 무용이 대단하여 연합군의 장수들이 연달아 목숨을 잃고 있소.' },
-      { speaker: '관우', text: '소장이 나아가 화웅의 목을 베어 오겠습니다. 술 한 잔을 데워두십시오.' }
-    ]
+      { speaker: '관우', text: '소장이 나아가 화웅의 목을 베어 오겠습니다. 술 한 잔을 데워두십시오.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '조조', text: '과연 관운장이로다! 아직 술잔이 따뜻하구나!' },
+      { speaker: '유비', text: '아우의 무용이 연합군의 사기를 드높였소.' },
+    ],
   },
+  // 2. 호로관 전투
   {
     id: 2,
     code: 'hulao_pass',
     chapter: 0,
     chapterTitle: '서장: 반동탁 연합군',
-    name: '호뢰관 전투',
-    description: '적토마를 탄 천하무쌍 여포가 호뢰관 앞에 서서 연합군을 도륙하자, 유비 삼형제가 함께 맞선다.',
+    name: '호로관 전투',
+    description: '적토마를 탄 천하무쌍 여포가 호로관 앞에 서서 연합군을 도륙하자, 유비 삼형제가 함께 맞선다.',
     width: 14,
     height: 10,
     mapData: generateMap([
@@ -118,13 +121,13 @@ export const STAGES: StageDef[] = [
       ',..FFF....W#BM',
       'M..FF...WWW#MM',
       'MM...WWWWW.GMM',
-      'MMMMMMMMMMMMMM'
+      'MMMMMMMMMMMMMM',
     ]),
     maxTurns: 30,
     victoryCondition: '여포 격파 또는 동탁의 퇴각',
     defeatCondition: '유비의 퇴각 또는 제한 턴 초과',
     playerDeploymentLimit: 6,
-    requiredPlayerCharIds: ['liu_bei'],
+    requiredPlayerCharIds: ["liu_bei"],
     clearGold: 800,
     clearExpBonus: 60,
     initialDeployments: [
@@ -133,13 +136,11 @@ export const STAGES: StageDef[] = [
       { charId: 'zhang_fei', x: 2, y: 5, faction: 'player' },
       { charId: 'jian_yong', x: 1, y: 2, faction: 'player' },
       { charId: 'fan_gong', x: 1, y: 6, faction: 'player' },
-
-      // 적군
       { charId: 'lu_bu', x: 7, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
       { charId: 'dong_zhuo', x: 12, y: 4, faction: 'enemy', aiType: 'hold' },
       { charId: 'li_ru', x: 11, y: 3, faction: 'enemy', aiType: 'hold' },
       { charId: 'deng_mao', x: 6, y: 2, faction: 'enemy', aiType: 'aggressive' },
-      { charId: 'cheng_yuanzhi', x: 6, y: 6, faction: 'enemy', aiType: 'aggressive' }
+      { charId: 'cheng_yuanzhi', x: 6, y: 6, faction: 'enemy', aiType: 'aggressive' },
     ],
     duels: [
       {
@@ -147,20 +148,27 @@ export const STAGES: StageDef[] = [
         enemyCharId: 'lu_bu',
         dialogueLines: [
           { speaker: '장비', text: '삼성가노 여포 놈아! 연인 장익덕이 여기 있다!' },
-          { speaker: '여포', text: '주둥이만 산 놈! 방천화극의 맛을 보아라!' }
+          { speaker: '여포', text: '주둥이만 산 놈! 방천화극의 맛을 보아라!' },
         ],
         winner: 'player',
         rewardExp: 80,
         enemyRetreats: false
-      }
+      },
     ],
     treasures: [
       { x: 12, y: 2, itemId: 'manual_sword' },
-      { x: 12, y: 6, itemId: 'meat' }
-    ]
+      { x: 12, y: 6, itemId: 'meat' },
+    ],
+    preBattleDialogue: [
+      { speaker: '여포', text: '연합군의 무리들아, 덤빌 테면 한꺼번에 덤벼보아라!' },
+      { speaker: '장비', text: '네 이놈 여포! 내 장팔사모를 받아라!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '여포', text: '크윽... 유비 삼형제의 기세가 이리 거셀 줄이야! 호로관 안으로 후퇴한다!' },
+      { speaker: '유비', text: '여포가 물러났다! 적의 본진을 압박하라!' },
+    ],
   },
-
-  // ==================== 제1장: 군웅할거 ====================
+  // 3. 계교 전투
   {
     id: 3,
     code: 'jieqiao',
@@ -180,13 +188,13 @@ export const STAGES: StageDef[] = [
       '..,,,,...==...',
       '..,....FF..FF.',
       '......FF......',
-      'WWWWWWWWWWWWWW'
+      'WWWWWWWWWWWWWW',
     ]),
     maxTurns: 35,
     victoryCondition: '원소 격파 또는 적 전멸',
     defeatCondition: '공손찬 또는 유비의 퇴각',
     playerDeploymentLimit: 6,
-    requiredPlayerCharIds: ['liu_bei'],
+    requiredPlayerCharIds: ["liu_bei"],
     clearGold: 1000,
     clearExpBonus: 70,
     initialDeployments: [
@@ -195,12 +203,11 @@ export const STAGES: StageDef[] = [
       { charId: 'zhang_fei', x: 1, y: 5, faction: 'player' },
       { charId: 'jian_yong', x: 0, y: 4, faction: 'player' },
       { charId: 'zhao_yun', x: 4, y: 4, faction: 'player' },
-
-      // 원소군
+      { charId: 'gongsun_zan', x: 2, y: 4, faction: 'ally', isCommander: true },
       { charId: 'yuan_shao', x: 12, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
       { charId: 'wen_chou', x: 8, y: 3, faction: 'enemy', aiType: 'aggressive' },
       { charId: 'yan_liang', x: 8, y: 5, faction: 'enemy', aiType: 'aggressive' },
-      { charId: 'chunyu_qiong', x: 10, y: 4, faction: 'enemy', aiType: 'aggressive' }
+      { charId: 'chunyu_qiong', x: 10, y: 4, faction: 'enemy', aiType: 'aggressive' },
     ],
     duels: [
       {
@@ -208,17 +215,28 @@ export const STAGES: StageDef[] = [
         enemyCharId: 'wen_chou',
         dialogueLines: [
           { speaker: '문추', text: '풋내기 녀석, 상산 조자룡이라 하였느냐!' },
-          { speaker: '조운', text: '공손찬 태수를 건드리지 마라!' }
+          { speaker: '조운', text: '공손찬 사형을 건드리지 마라!' },
+          { speaker: '문추', text: '헛! 창술의 솜씨가 예사롭지 않구나!' },
         ],
         winner: 'player',
         rewardExp: 100,
         enemyRetreats: true
-      }
+      },
     ],
     treasures: [
-      { x: 2, y: 4, itemId: 'manual_horse' }
-    ]
+      { x: 2, y: 4, itemId: 'manual_horse' },
+      { x: 12, y: 2, itemId: 'rice' },
+    ],
+    preBattleDialogue: [
+      { speaker: '공손찬', text: '현덕, 원소의 군세가 막강하여 포위당할 뻔하였소!' },
+      { speaker: '조운', text: '소장이 앞장서서 원소군의 길목을 끊겠습니다!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '유비', text: '조자룡 장군, 그대의 충용에 깊이 감탄하였소.' },
+      { speaker: '조운', text: '유현덕 님의 덕망을 흠모하고 있었습니다. 언젠가 다시 뵙기를 소망합니다.' },
+    ],
   },
+  // 4. 북해 전투
   {
     id: 4,
     code: 'beihai',
@@ -238,636 +256,2564 @@ export const STAGES: StageDef[] = [
       '..FF......FF..',
       '..FFFF..FFFF..',
       'MM..FF..FF..MM',
-      'MMMM......MMMM'
+      'MMMM......MMMM',
     ]),
     maxTurns: 30,
-    victoryCondition: '관해 격파 및 적 전멸',
-    defeatCondition: '유비의 퇴각',
+    victoryCondition: '적 전멸',
+    defeatCondition: '공융 또는 유비의 퇴각',
     playerDeploymentLimit: 6,
-    requiredPlayerCharIds: ['liu_bei'],
+    requiredPlayerCharIds: ["liu_bei"],
     clearGold: 1000,
     clearExpBonus: 70,
     initialDeployments: [
       { charId: 'liu_bei', x: 1, y: 4, faction: 'player', isCommander: true },
       { charId: 'guan_yu', x: 2, y: 3, faction: 'player' },
       { charId: 'zhang_fei', x: 2, y: 5, faction: 'player' },
-      { charId: 'cheng_yuanzhi', x: 10, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
-      { charId: 'deng_mao', x: 8, y: 3, faction: 'enemy', aiType: 'aggressive' },
-      { charId: 'deng_mao', x: 8, y: 5, faction: 'enemy', aiType: 'aggressive' }
+      { charId: 'taishi_ci', x: 3, y: 4, faction: 'ally' },
+      { charId: 'kong_rong', x: 6, y: 4, faction: 'ally', isCommander: true },
+      { charId: 'deng_mao', x: 9, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'cheng_yuanzhi', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'cheng_yuanzhi', x: 10, y: 5, faction: 'enemy', aiType: 'aggressive' },
     ],
     duels: [
       {
         playerCharId: 'guan_yu',
-        enemyCharId: 'cheng_yuanzhi',
+        enemyCharId: 'deng_mao',
         dialogueLines: [
-          { speaker: '관해', text: '감히 내 앞을 가로막다니 죽음을 자초하는구나!' },
-          { speaker: '관우', text: '도적 무리의 우두머리는 청룡도를 받아라!' }
+          { speaker: '관우', text: '도탄에 빠진 백성을 괴롭히는 도적 놈들, 청룡도를 받아라!' },
+          { speaker: '적장', text: '으악! 이 일격은 대체...!' },
         ],
         winner: 'player',
-        rewardExp: 100,
+        rewardExp: 90,
         enemyRetreats: true
-      }
-    ]
+      },
+    ],
+    treasures: [
+      { x: 4, y: 4, itemId: 'good_medicine' },
+      { x: 7, y: 5, itemId: 'iron_sword' },
+    ],
+    preBattleDialogue: [
+      { speaker: '태사자', text: '유현덕 님, 북해의 공융 태수님을 부디 구원해 주십시오!' },
+      { speaker: '유비', text: '의기를 보고도 돕지 않는다면 어찌 사내라 하겠소! 전군 진격하라!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '공융', text: '현덕 공, 덕분에 북해의 백성들이 무사할 수 있었소!' },
+    ],
   },
+  // 5. 서주 전투
   {
     id: 5,
     code: 'xuzhou',
     chapter: 1,
     chapterTitle: '제1장: 군웅할거',
-    name: '서주 구원전',
-    description: '부친 조숭의 원수를 갚으려 서주를 침공한 조조 대군. 유비는 도겸을 구하기 위해 서주성으로 입성한다.',
+    name: '서주 전투',
+    description: '부친 조숭의 원수를 갚겠다며 서주를 도륙하는 조조군에 맞서 도겸을 구원하러 유비가 입성한다.',
     width: 14,
     height: 10,
     mapData: generateMap([
-      'MMMMMMMMMMMMMM',
-      'M#CCCCCCCCCC#M',
-      'M#CBB....BBC#M',
-      'M#C..FFFF..C#M',
-      'M#C..FFFF..C#M',
-      'M#C..FFFF..C#M',
-      'M#CBB....BBC#M',
-      'M#CCCCCCCCCC#M',
-      'MM....GG....MM',
-      'MMMMMMMMMMMMMM'
+      '##############',
+      '#CCCCCC..CCCC#',
+      '#C....F..F..C#',
+      '#C.==......=C#',
+      '#C.~~..VV..~C#',
+      '#C.~~..VV..~C#',
+      '#C.==......=C#',
+      '#C....F..F..C#',
+      '#CCCCCC..CCCC#',
+      '##############',
     ]),
     maxTurns: 30,
-    victoryCondition: '유비의 서주성 진입 또는 우금/하후연 격퇴',
-    defeatCondition: '유비의 퇴각 또는 도겸의 사망',
+    victoryCondition: '하후돈 격파 또는 조조 퇴각',
+    defeatCondition: '도겸 또는 유비의 퇴각',
     playerDeploymentLimit: 6,
-    requiredPlayerCharIds: ['liu_bei'],
+    requiredPlayerCharIds: ["liu_bei"],
     clearGold: 1200,
     clearExpBonus: 80,
-    initialDeployments: [
-      { charId: 'liu_bei', x: 6, y: 8, faction: 'player', isCommander: true },
-      { charId: 'guan_yu', x: 5, y: 8, faction: 'player' },
-      { charId: 'zhang_fei', x: 7, y: 8, faction: 'player' },
-      { charId: 'xiahou_yuan', x: 6, y: 3, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
-      { charId: 'dian_wei', x: 4, y: 4, faction: 'enemy', aiType: 'aggressive' },
-      { charId: 'xu_chu', x: 8, y: 4, faction: 'enemy', aiType: 'aggressive' }
-    ]
-  },
-  {
-    id: 6,
-    code: 'xiapi',
-    chapter: 1,
-    chapterTitle: '제1장: 군웅할거',
-    name: '하비 전투 (여포 토벌)',
-    description: '수공으로 하비성이 물에 잠기고 여포는 백문루에서 마지막 저항을 벌인다.',
-    width: 14,
-    height: 10,
-    mapData: generateMap([
-      'SSSSSSSSSSSSSS',
-      'SS~~~~~~~~~~SS',
-      'S~##GG##GG##~S',
-      'S~#CCCCCCCC#~S',
-      'S~#CB....BC#~S',
-      'S~#C......C#~S',
-      'S~#CCCCCCCC#~S',
-      'S~##GG##GG##~S',
-      'SS~~~~~~~~~~SS',
-      'SSSSSSSSSSSSSS'
-    ]),
-    maxTurns: 35,
-    victoryCondition: '여포 격파',
-    defeatCondition: '유비의 퇴각',
-    playerDeploymentLimit: 7,
-    requiredPlayerCharIds: ['liu_bei'],
-    clearGold: 1500,
-    clearExpBonus: 90,
     initialDeployments: [
       { charId: 'liu_bei', x: 2, y: 4, faction: 'player', isCommander: true },
       { charId: 'guan_yu', x: 2, y: 3, faction: 'player' },
       { charId: 'zhang_fei', x: 2, y: 5, faction: 'player' },
-      { charId: 'lu_bu', x: 6, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
-      { charId: 'zhang_liao', x: 7, y: 3, faction: 'enemy', aiType: 'aggressive' }
+      { charId: 'tao_qian', x: 6, y: 4, faction: 'ally', isCommander: true },
+      { charId: 'xiahou_dun', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'yu_jin', x: 11, y: 2, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'li_dian', x: 11, y: 6, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhang_fei',
+        enemyCharId: 'xiahou_dun',
+        dialogueLines: [
+          { speaker: '장비', text: '조조의 애꾸눈 장수야, 내 장팔사모를 견뎌보아라!' },
+          { speaker: '하후돈', text: '무례한 놈! 승상의 대업을 방해하려 들다니!' },
+        ],
+        winner: 'player',
+        rewardExp: 100,
+        enemyRetreats: false
+      },
+    ],
+    treasures: [
+      { x: 6, y: 3, itemId: 'rice' },
+      { x: 7, y: 6, itemId: 'manual_bow' },
+    ],
+    preBattleDialogue: [
+      { speaker: '도겸', text: '조조가 온 서주의 백성을 도륙하려 하니 하늘이 무심하오...' },
+      { speaker: '유비', text: '제가 목숨을 바쳐 서주를 지키겠습니다!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '하후돈', text: '여포가 조조님의 본거지 연주를 기습했다고?! 당장 회군한다!' },
+      { speaker: '도겸', text: '현덕 공, 이 서주의 인수를 부디 받아주시오.' },
+    ],
+  },
+  // 6. 소패 전투
+  {
+    id: 6,
+    code: 'xiaopei',
+    chapter: 1,
+    chapterTitle: '제1장: 군웅할거',
+    name: '소패 전투',
+    description: '원술의 맹장 기령이 3만 대군으로 소패를 침공하자, 관우가 삼첨도를 든 기령과 맞붙는다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '..FF......FF..',
+      '..FF.FFFF.FF..',
+      '....FFFFFF....',
+      '....==..==....',
+      '..~~~~~~~~~~..',
+      '..~~~~~~~~~~..',
+      '....==..==....',
+      '....FFFFFF....',
+      '..FF.FFFF.FF..',
+      '..FF......FF..',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '기령 격파 또는 적 전멸',
+    defeatCondition: '유비의 퇴각',
+    playerDeploymentLimit: 6,
+    requiredPlayerCharIds: ["liu_bei"],
+    clearGold: 1300,
+    clearExpBonus: 85,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'guan_yu', x: 3, y: 3, faction: 'player' },
+      { charId: 'zhang_fei', x: 3, y: 5, faction: 'player' },
+      { charId: 'ji_ling', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'deng_mao', x: 10, y: 2, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'cheng_yuanzhi', x: 10, y: 6, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'guan_yu',
+        enemyCharId: 'ji_ling',
+        dialogueLines: [
+          { speaker: '기령', text: '삼첨도의 예리함을 보아라!' },
+          { speaker: '관우', text: '관모의 청룡도를 상대로 서른 합을 넘기지 못할 것이다!' },
+          { speaker: '기령', text: '숨이 턱에 차는구나... 잠시 쉬었다가 싸우자!' },
+        ],
+        winner: 'player',
+        rewardExp: 110,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 11, y: 2, itemId: 'iron_spear' },
+      { x: 11, y: 6, itemId: 'clear_wine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '유비', text: '원술이 서주를 노리고 쳐들어왔다. 결코 한 발자국도 물러서지 마라!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '기령', text: '관우의 무용이 이토록 무시무시할 줄이야... 후퇴하라!' },
+    ],
+  },
+  // 7. 태산 전투
+  {
+    id: 7,
+    code: 'taishan',
+    chapter: 1,
+    chapterTitle: '제1장: 군웅할거',
+    name: '태산 전투',
+    description: '태산의 험준한 산악을 근거지로 삼은 장패의 산적 잔당을 토벌하여 후방의 우환을 없앤다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      'MMMMMMMMMMMMMM',
+      'MM...MMMM...MM',
+      'M.FF..MM..FF.M',
+      '..FFFF..FFFF..',
+      '..FF..TT..FF..',
+      '..FF..TT..FF..',
+      '..FFFF..FFFF..',
+      'M.FF..MM..FF.M',
+      'MM...MMMM...MM',
+      'MMMMMMMMMMMMMM',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '장패 격파 또는 적 전멸',
+    defeatCondition: '유비의 퇴각',
+    playerDeploymentLimit: 6,
+    requiredPlayerCharIds: ["liu_bei"],
+    clearGold: 1400,
+    clearExpBonus: 90,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 1, y: 4, faction: 'player', isCommander: true },
+      { charId: 'guan_yu', x: 2, y: 3, faction: 'player' },
+      { charId: 'zhang_fei', x: 2, y: 5, faction: 'player' },
+      { charId: 'cang_ba', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'deng_mao', x: 9, y: 3, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'cheng_yuanzhi', x: 9, y: 5, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhang_fei',
+        enemyCharId: 'cang_ba',
+        dialogueLines: [
+          { speaker: '장패', text: '산골짜기에서 나를 이길 자는 없다!' },
+          { speaker: '장비', text: '태산 도적놈아, 벼락 같은 내 고함 소리를 들어라!' },
+        ],
+        winner: 'player',
+        rewardExp: 100,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 6, y: 4, itemId: 'good_medicine' },
+      { x: 7, y: 5, itemId: 'manual_sword' },
+    ],
+    preBattleDialogue: [
+      { speaker: '유비', text: '험준한 산악 지형이니 낙석과 매복을 각별히 조심하시오.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '장패', text: '유현덕 공의 위세에 항복하오!' },
+    ],
+  },
+  // 8. 하구 전투
+  {
+    id: 8,
+    code: 'xiaqiu',
+    chapter: 1,
+    chapterTitle: '제1장: 군웅할거',
+    name: '하구 전투',
+    description: '여포의 명장 장료가 하구에 진을 치자 관우가 오랜 벗이자 호적수인 장료와 마주한다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      ',,,,..~~~~..,,,,',
+      ',,,,..~~~~..,,,,',
+      '..FF....==....FF',
+      '..FF....==....FF',
+      '..VV....==....VV',
+      '..VV....==....VV',
+      '..FF....==....FF',
+      '..FF....==....FF',
+      ',,,,..~~~~..,,,,',
+      ',,,,..~~~~..,,,,',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '장료 격파 또는 적 전멸',
+    defeatCondition: '유비의 퇴각',
+    playerDeploymentLimit: 6,
+    requiredPlayerCharIds: ["liu_bei"],
+    clearGold: 1500,
+    clearExpBonus: 95,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'guan_yu', x: 3, y: 4, faction: 'player' },
+      { charId: 'zhang_fei', x: 2, y: 6, faction: 'player' },
+      { charId: 'zhang_liao', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'gao_shun', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
     ],
     duels: [
       {
         playerCharId: 'guan_yu',
         enemyCharId: 'zhang_liao',
         dialogueLines: [
-          { speaker: '관우', text: '문원! 어찌 여포 같은 의리 없는 자를 섬기는가!' },
-          { speaker: '장료', text: '운장 형님... 장수로서 주군을 지킬 뿐이오!' }
+          { speaker: '관우', text: '문원! 어찌하여 여포 같은 배은망덕한 자를 섬기는가!' },
+          { speaker: '장료', text: '운장 형님, 장수로서 주군을 따르는 것 또한 저의 도리입니다!' },
         ],
         winner: 'player',
-        rewardExp: 80,
+        rewardExp: 120,
         enemyRetreats: false
-      }
+      },
     ],
     treasures: [
-      { x: 6, y: 5, itemId: 'fangtian_halberd' },
-      { x: 7, y: 5, itemId: 'red_hare' }
-    ]
-  },
-
-  // ==================== 제2장: 관도대전 & 방랑 ====================
-  {
-    id: 7,
-    code: 'baima',
-    chapter: 2,
-    chapterTitle: '제2장: 관도대전 & 방랑',
-    name: '백마 전투',
-    description: '조조에게 잠시 의탁했던 관우가 원소의 맹장 안량을 단칼에 베어 조조의 은혜에 보답한다.',
-    width: 14,
-    height: 10,
-    mapData: generateMap([
-      '..............',
-      '...FF....FF...',
-      '..FFFF..FFFF..',
-      '..FFFF..FFFF..',
-      '..............',
-      '..~~~~~~~~~~..',
-      '......==......',
-      '..............',
-      '...WW....WW...',
-      '..WWWW..WWWW..'
-    ]),
-    maxTurns: 30,
-    victoryCondition: '안량 격파',
-    defeatCondition: '조조 또는 관우의 퇴각',
-    playerDeploymentLimit: 5,
-    requiredPlayerCharIds: ['guan_yu'],
-    clearGold: 1200,
-    clearExpBonus: 90,
-    initialDeployments: [
-      { charId: 'guan_yu', x: 6, y: 7, faction: 'player', isCommander: true },
-      { charId: 'zhang_liao', x: 5, y: 8, faction: 'ally' },
-      { charId: 'xu_huang', x: 7, y: 8, faction: 'ally' },
-      { charId: 'yan_liang', x: 6, y: 2, faction: 'enemy', isCommander: true, aiType: 'hold' },
-      { charId: 'chunyu_qiong', x: 4, y: 3, faction: 'enemy', aiType: 'aggressive' }
+      { x: 2, y: 4, itemId: 'rice' },
+      { x: 11, y: 5, itemId: 'meat' },
     ],
-    duels: [
-      {
-        playerCharId: 'guan_yu',
-        enemyCharId: 'yan_liang',
-        dialogueLines: [
-          { speaker: '안량', text: '조조군에 저런 장수가 있었던가? 누구냐!' },
-          { speaker: '관우', text: '한수정후 관운장이다! 네 목을 가져가겠다!' }
-        ],
-        winner: 'player',
-        rewardExp: 100,
-        enemyRetreats: true
-      }
-    ]
-  },
-  {
-    id: 8,
-    code: 'yanjin',
-    chapter: 2,
-    chapterTitle: '제2장: 관도대전 & 방랑',
-    name: '연진 전투',
-    description: '안량의 원수를 갚으려 진격해 온 문추를 관우가 황하 강변에서 또다시 베어 넘긴다.',
-    width: 14,
-    height: 10,
-    mapData: generateMap([
-      '~~~~~~~~~~~~~~',
-      '~~~~~~~~~~~~~~',
-      '......==......',
-      '..............',
-      '..FF......FF..',
-      '..FFFF..FFFF..',
-      '..FFFF..FFFF..',
-      '..............',
-      '....WW..WW....',
-      '..WWWW..WWWW..'
-    ]),
-    maxTurns: 30,
-    victoryCondition: '문추 격파',
-    defeatCondition: '조조 또는 관우의 퇴각',
-    playerDeploymentLimit: 5,
-    requiredPlayerCharIds: ['guan_yu'],
-    clearGold: 1200,
-    clearExpBonus: 90,
-    initialDeployments: [
-      { charId: 'guan_yu', x: 6, y: 4, faction: 'player', isCommander: true },
-      { charId: 'wen_chou', x: 6, y: 1, faction: 'enemy', isCommander: true, aiType: 'aggressive' }
+    preBattleDialogue: [
+      { speaker: '관우', text: '장료는 의기가 넘치는 장수요. 부디 살려 회유할 수 있기를 바라오.' },
     ],
-    duels: [
-      {
-        playerCharId: 'guan_yu',
-        enemyCharId: 'wen_chou',
-        dialogueLines: [
-          { speaker: '문추', text: '네 놈이 안량 형님을 죽인 관우냐! 원수를 갚겠다!' },
-          { speaker: '관우', text: '너 또한 원소의 헛된 욕심에 희생될 뿐이다!' }
-        ],
-        winner: 'player',
-        rewardExp: 100,
-        enemyRetreats: true
-      }
-    ]
+    postBattleDialogue: [
+      { speaker: '장료', text: '과연 운장 형님의 무예로다. 후퇴하라!' },
+    ],
   },
+  // 9. 팽성 전투
   {
     id: 9,
-    code: 'runan',
-    chapter: 2,
-    chapterTitle: '제2장: 관도대전 & 방랑',
-    name: '여남 전투 (조운 재회)',
-    description: '여남에서 유비가 조조군의 포위를 당했을 때, 조자룡이 달려와 유비를 구원하고 평생의 군신이 된다.',
+    code: 'pengcheng',
+    chapter: 1,
+    chapterTitle: '제1장: 군웅할거',
+    name: '팽성 전투',
+    description: '여포의 군사 진궁이 복병을 배치해 유비군을 기습하려 하자, 침착하게 매복을 격파한다.',
     width: 14,
     height: 10,
     mapData: generateMap([
-      'MMMM......MMMM',
-      'MM..FF..FF..MM',
-      '..FFFF..FFFF..',
-      '..FF..VV..FF..',
-      '....VVVVVV....',
-      '....VVVVVV....',
-      '..FF..VV..FF..',
-      '..FFFF..FFFF..',
-      'MM..FF..FF..MM',
-      'MMMM......MMMM'
+      'FFFF..FFFF..FFFF',
+      'FFFF..FFFF..FFFF',
+      '..FF....FF....FF',
+      '..FF....FF....FF',
+      '....WW....WW....',
+      '....WW....WW....',
+      '..FF....FF....FF',
+      '..FF....FF....FF',
+      'FFFF..FFFF..FFFF',
+      'FFFF..FFFF..FFFF',
     ]),
     maxTurns: 30,
-    victoryCondition: '조조군 격퇴 또는 유비의 탈출',
+    victoryCondition: '진궁 격파 또는 적 전멸',
     defeatCondition: '유비의 퇴각',
     playerDeploymentLimit: 6,
-    requiredPlayerCharIds: ['liu_bei'],
-    clearGold: 1400,
+    requiredPlayerCharIds: ["liu_bei"],
+    clearGold: 1600,
     clearExpBonus: 100,
     initialDeployments: [
-      { charId: 'liu_bei', x: 6, y: 5, faction: 'player', isCommander: true },
-      { charId: 'guan_yu', x: 5, y: 5, faction: 'player' },
-      { charId: 'zhang_fei', x: 7, y: 5, faction: 'player' },
-      { charId: 'zhao_yun', x: 1, y: 5, faction: 'player' },
-      { charId: 'xu_chu', x: 10, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
-      { charId: 'xiahou_dun', x: 10, y: 6, faction: 'enemy', aiType: 'aggressive' }
+      { charId: 'liu_bei', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'guan_yu', x: 2, y: 3, faction: 'player' },
+      { charId: 'zhang_fei', x: 2, y: 5, faction: 'player' },
+      { charId: 'chen_gong', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'gao_shun', x: 9, y: 4, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'deng_mao', x: 9, y: 2, faction: 'enemy', aiType: 'aggressive' },
     ],
     duels: [
       {
-        playerCharId: 'zhao_yun',
-        enemyCharId: 'xu_chu',
+        playerCharId: 'zhang_fei',
+        enemyCharId: 'gao_shun',
         dialogueLines: [
-          { speaker: '허저', text: '애송이 장수가 제법이구나! 나와 힘을 겨뤄보자!' },
-          { speaker: '조운', text: '주군을 해치려는 자는 이 조자룡의 창을 넘지 못한다!' }
+          { speaker: '고순', text: '함진영의 방패를 뚫을 수 있을 것 같으냐!' },
+          { speaker: '장비', text: '내 장팔사모에 뚫리지 않는 방패는 없다!' },
         ],
         winner: 'player',
-        rewardExp: 80,
-        enemyRetreats: false
-      }
-    ]
+        rewardExp: 110,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 11, y: 2, itemId: 'art_of_war' },
+    ],
+    preBattleDialogue: [
+      { speaker: '진궁', text: '유비 놈의 목을 베어 여포 장군께 바치겠다!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '진궁', text: '매복이 간파당하다니... 하비성으로 물러선다!' },
+    ],
   },
+  // 10. 하비 전투 (여포의 최후)
   {
     id: 10,
-    code: 'bowangpo',
-    chapter: 2,
-    chapterTitle: '제2장: 관도대전 & 방랑',
-    name: '박망파 전투 (제갈량의 데뷔전)',
-    description: '삼고초려로 얻은 군사 제갈량의 첫 출진. 좁은 박망파 계곡에서 화공으로 하후돈의 10만 군을 불태운다.',
+    code: 'xiapi',
+    chapter: 1,
+    chapterTitle: '제1장: 군웅할거',
+    name: '하비 전투 (여포의 최후)',
+    description: '조조와 유비의 연합군이 기수와 사수의 물길을 터 하비성을 수몰시키고 여포의 명줄을 끊는다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '~~~~~~~~~~~~~~',
+      '~############~',
+      '~#CCCCCCCCCC#~',
+      '~#C...TT...C#~',
+      '~#C.BB..BB.C#~',
+      '~#C.BB..BB.C#~',
+      '~#C...TT...C#~',
+      '~#CCCCCCCCCC#~',
+      '~######GG####~',
+      '~~~~~~~~~~~~~~',
+    ]),
+    maxTurns: 35,
+    victoryCondition: '여포 포박 및 적 전멸',
+    defeatCondition: '유비의 퇴각',
+    playerDeploymentLimit: 7,
+    requiredPlayerCharIds: ["liu_bei"],
+    clearGold: 2000,
+    clearExpBonus: 120,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 6, y: 8, faction: 'player', isCommander: true },
+      { charId: 'guan_yu', x: 5, y: 8, faction: 'player' },
+      { charId: 'zhang_fei', x: 7, y: 8, faction: 'player' },
+      { charId: 'cao_cao', x: 8, y: 8, faction: 'ally', isCommander: true },
+      { charId: 'lu_bu', x: 6, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'chen_gong', x: 5, y: 4, faction: 'enemy', aiType: 'hold' },
+      { charId: 'zhang_liao', x: 7, y: 4, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'gao_shun', x: 6, y: 5, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'guan_yu',
+        enemyCharId: 'lu_bu',
+        dialogueLines: [
+          { speaker: '여포', text: '내 적토마와 방천화극이 있는 한 아무도 나를 막을 수 없다!' },
+          { speaker: '관우', text: '신의를 저버린 자의 말로는 비참한 법이오, 여봉선!' },
+          { speaker: '여포', text: '으윽... 팔다리에 힘이 빠지는구나... 부하들이 날 배신했단 말인가!' },
+        ],
+        winner: 'player',
+        rewardExp: 150,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 4, y: 3, itemId: 'red_hare' },
+      { x: 8, y: 3, itemId: 'fangtian_halberd' },
+    ],
+    preBattleDialogue: [
+      { speaker: '조조', text: '현덕, 오늘로 호랑이 같은 여포의 명줄을 끊읍시다.' },
+      { speaker: '유비', text: '천하를 어지럽힌 화근을 마침내 제거하게 되었소.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '여포', text: '유현덕! 네 놈이 어찌 백문루에서 나를 변호해주지 않는단 말이냐!' },
+      { speaker: '조조', text: '정원과 동탁의 일을 잊으셨소? 여포를 처형하라!' },
+    ],
+  },
+  // 11. 광릉 전투
+  {
+    id: 11,
+    code: 'guangling',
+    chapter: 1,
+    chapterTitle: '제1장: 군웅할거',
+    name: '광릉 전투',
+    description: '황제를 참칭하다 패망한 원술의 잔당을 광릉에서 소탕하고 전한의 옥새를 수습한다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '..FF....FF....',
+      '..FF....FF....',
+      ',,...==...==,,',
+      ',,.~~~~...~~~~',
+      ',,.~~~~...~~~~',
+      ',,.~~~~...~~~~',
+      ',,...==...==,,',
+      '..FF....FF....',
+      '..FF....FF....',
+      'WWWWWWWWWWWWWW',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '원술 격파 또는 적 전멸',
+    defeatCondition: '유비의 퇴각',
+    playerDeploymentLimit: 6,
+    requiredPlayerCharIds: ["liu_bei"],
+    clearGold: 1800,
+    clearExpBonus: 100,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 1, y: 4, faction: 'player', isCommander: true },
+      { charId: 'guan_yu', x: 2, y: 3, faction: 'player' },
+      { charId: 'zhang_fei', x: 2, y: 5, faction: 'player' },
+      { charId: 'yuan_shu', x: 12, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'ji_ling', x: 9, y: 4, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhang_fei',
+        enemyCharId: 'ji_ling',
+        dialogueLines: [
+          { speaker: '장비', text: '반역자 꿀물 원술의 부하놈아! 장비님의 사모 맛을 보아라!' },
+          { speaker: '기령', text: '크아악! 이 곰 같은 놈의 힘은 당해낼 수가 없구나!' },
+        ],
+        winner: 'player',
+        rewardExp: 120,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 12, y: 2, itemId: 'clear_wine' },
+      { x: 12, y: 6, itemId: 'good_medicine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '원술', text: '꿀물을 다오... 꿀물이 마시고 싶구나!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '유비', text: '참칭자의 비참한 최후로다. 천명은 결코 사리사욕으로 얻을 수 없는 법.' },
+    ],
+  },
+  // 12. 연주 탈출전
+  {
+    id: 12,
+    code: 'yanzhou',
+    chapter: 1,
+    chapterTitle: '제1장: 군웅할거',
+    name: '연주 탈출전',
+    description: '조조의 암살 음모가 탄로 나자, 유비는 허창을 탈출하여 서주와 연주 방면으로 달아난다.',
     width: 14,
     height: 10,
     mapData: generateMap([
       'MMMMMMMMMMMMMM',
-      'MMMMFFFFFFMMMM',
-      'MMFFFFFFFFFFMM',
-      '..FFFFFFFFFF..',
-      '..FFFFFFFFFF..',
-      '..FFFFFFFFFF..',
-      '..FFFFFFFFFF..',
-      'MMFFFFFFFFFFMM',
-      'MMMMFFFFFFMMMM',
-      'MMMMMMMMMMMMMM'
+      'M..FF..FF..FFM',
+      'M.FFFF.FFFF.FM',
+      '..FF....FF....',
+      ',,...==...==,,',
+      ',,.~~~~...~~~~',
+      '..FF....FF....',
+      'M.FFFF.FFFF.FM',
+      'M..FF..FF..FFM',
+      'MMMMMMMMMMMMMM',
     ]),
     maxTurns: 30,
-    victoryCondition: '하후돈 격파',
+    victoryCondition: '유비가 동쪽 끝(X=13)에 도달 또는 조조 격퇴',
     defeatCondition: '유비의 퇴각',
-    playerDeploymentLimit: 7,
-    requiredPlayerCharIds: ['liu_bei', 'zhuge_liang'],
-    clearGold: 1600,
-    clearExpBonus: 120,
+    playerDeploymentLimit: 6,
+    requiredPlayerCharIds: ["liu_bei"],
+    clearGold: 1800,
+    clearExpBonus: 110,
     initialDeployments: [
       { charId: 'liu_bei', x: 1, y: 4, faction: 'player', isCommander: true },
-      { charId: 'zhuge_liang', x: 0, y: 4, faction: 'player' },
-      { charId: 'zhao_yun', x: 4, y: 4, faction: 'player' },
-      { charId: 'guan_yu', x: 6, y: 2, faction: 'player' },
-      { charId: 'zhang_fei', x: 6, y: 7, faction: 'player' },
-      { charId: 'xiahou_dun', x: 10, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
-      { charId: 'xiahou_yuan', x: 11, y: 3, faction: 'enemy', aiType: 'aggressive' }
+      { charId: 'guan_yu', x: 2, y: 3, faction: 'player' },
+      { charId: 'zhang_fei', x: 2, y: 5, faction: 'player' },
+      { charId: 'cao_cao', x: 10, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'xiahou_dun', x: 9, y: 3, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'xu_chu', x: 9, y: 5, faction: 'enemy', aiType: 'aggressive' },
     ],
     duels: [
       {
         playerCharId: 'guan_yu',
         enemyCharId: 'xiahou_dun',
         dialogueLines: [
-          { speaker: '하후돈', text: '제갈량의 풋내기 화공에 내가 당하다니!' },
-          { speaker: '관우', text: '군사님의 묘책은 하늘도 꿰뚫는다. 어서 물러가라!' }
+          { speaker: '하후돈', text: '유비! 승상의 은혜를 배신하고 어딜 도망치려느냐!' },
+          { speaker: '관우', text: '황제의 밀조를 받든 한실의 신하에게 무슨 망발인가!' },
         ],
         winner: 'player',
-        rewardExp: 80,
-        enemyRetreats: true
-      }
-    ]
+        rewardExp: 100,
+        enemyRetreats: false
+      },
+    ],
+    treasures: [
+      { x: 6, y: 3, itemId: 'rice' },
+    ],
+    preBattleDialogue: [
+      { speaker: '조조', text: '현덕! 매가 날개를 펼치기 전에 꺾었어야 했거늘!' },
+      { speaker: '유비', text: '조맹덕, 그대와 나의 길은 영원히 다를 뿐이오!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '유비', text: '무사히 조조의 포위망을 뚫었다. 북방의 원소에게 몸을 의탁하자.' },
+    ],
   },
+  // 13. 백마 전투
   {
-    id: 11,
-    code: 'changban',
+    id: 13,
+    code: 'baima',
     chapter: 2,
-    chapterTitle: '제2장: 관도대전 & 방랑',
-    name: '장판파 전투 (당양교의 일갈)',
-    description: '조운은 백만 대군을 뚫고 아두를 품에 안고 구출하고, 장비는 장판교 위에서 홀로 조조군을 호통쳐 물리친다.',
+    chapterTitle: '제2장: 관도대전과 방랑',
+    name: '백마 전투',
+    description: '원소의 대장 안량이 백마를 맹폭하자, 조조 진영에 의탁하던 관우가 은혜를 갚기 위해 안량을 벤다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      'MMMM......MMMM',
+      'MM..FF..FF..MM',
+      '..FFFF..FFFF..',
+      '..FF......FF..',
+      '....==..==....',
+      '....==..==....',
+      '..FF......FF..',
+      '..FFFF..FFFF..',
+      'MM..FF..FF..MM',
+      'MMMM......MMMM',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '안량 격파',
+    defeatCondition: '관우의 퇴각',
+    playerDeploymentLimit: 6,
+    requiredPlayerCharIds: ["guan_yu"],
+    clearGold: 2000,
+    clearExpBonus: 120,
+    initialDeployments: [
+      { charId: 'guan_yu', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'zhang_liao', x: 2, y: 3, faction: 'ally' },
+      { charId: 'cao_cao', x: 1, y: 4, faction: 'ally', isCommander: true },
+      { charId: 'yan_liang', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'chunyu_qiong', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'guan_yu',
+        enemyCharId: 'yan_liang',
+        dialogueLines: [
+          { speaker: '안량', text: '오는 자의 이름이 무엇이냐!' },
+          { speaker: '관우', text: '한수정후 관운장이다!' },
+          { speaker: '안량', text: '크헉! 칼이 너무나 빠르다...!' },
+        ],
+        winner: 'player',
+        rewardExp: 150,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 12, y: 4, itemId: 'good_medicine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '조조', text: '운장, 안량의 기세가 워낙 맹렬하여 아군의 장수들이 셋이나 쓰러졌소.' },
+      { speaker: '관우', text: '승상, 안량의 목은 짚풀 단을 베는 것과 같으니 잠시 기다리십시오.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '조조', text: '과연 천하의 미염공 관운장이로다!' },
+    ],
+  },
+  // 14. 연진 전투
+  {
+    id: 14,
+    code: 'yanjin',
+    chapter: 2,
+    chapterTitle: '제2장: 관도대전과 방랑',
+    name: '연진 전투',
+    description: '원소군의 맹장 문추가 복수를 다짐하며 연진으로 진격하자, 관우가 다시 출진하여 문추를 벤다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '~~~~~~~~~~~~~~',
+      '~~~~~~==~~~~~~',
+      '......==......',
+      '..FF......FF..',
+      '..FF.VVVV.FF..',
+      '..FF.VVVV.FF..',
+      '..FF......FF..',
+      '......==......',
+      '~~~~~~==~~~~~~',
+      '~~~~~~~~~~~~~~',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '문추 격파',
+    defeatCondition: '관우의 퇴각',
+    playerDeploymentLimit: 6,
+    requiredPlayerCharIds: ["guan_yu"],
+    clearGold: 2000,
+    clearExpBonus: 120,
+    initialDeployments: [
+      { charId: 'guan_yu', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'xu_huang', x: 2, y: 3, faction: 'ally' },
+      { charId: 'wen_chou', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'chunyu_qiong', x: 10, y: 5, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'guan_yu',
+        enemyCharId: 'wen_chou',
+        dialogueLines: [
+          { speaker: '문추', text: '네 놈이 안량 형님을 죽인 관우냐!' },
+          { speaker: '관우', text: '너 또한 저승길의 벗으로 보내주마!' },
+          { speaker: '문추', text: '말머리를 돌려 도망치려 했으나... 으악!' },
+        ],
+        winner: 'player',
+        rewardExp: 150,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 6, y: 4, itemId: 'manual_horse' },
+    ],
+    preBattleDialogue: [
+      { speaker: '문추', text: '관우 놈의 목을 베어 안량 형님의 영전에 바치겠다!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '관우', text: '조조에 대한 은혜는 이것으로 모두 갚았다. 이제 형님이 계신 곳으로 떠나리라.' },
+    ],
+  },
+  // 15. 여남 전투
+  {
+    id: 15,
+    code: 'runan',
+    chapter: 2,
+    chapterTitle: '제2장: 관도대전과 방랑',
+    name: '여남 전투',
+    description: '원소를 떠난 유비가 여남에서 세력을 규합하자, 조인이 이끄는 정예군이 기습을 감행한다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      'MMMM......MMMM',
+      'M..FF....FF..M',
+      '..FFFF..FFFF..',
+      '..FF......FF..',
+      '....VV..VV....',
+      '....VV..VV....',
+      '..FF......FF..',
+      '..FFFF..FFFF..',
+      'M..FF....FF..M',
+      'MMMM......MMMM',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '조인 격파 또는 적 전멸',
+    defeatCondition: '유비의 퇴각',
+    playerDeploymentLimit: 6,
+    requiredPlayerCharIds: ["liu_bei"],
+    clearGold: 2200,
+    clearExpBonus: 130,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'zhao_yun', x: 3, y: 4, faction: 'player' },
+      { charId: 'jian_yong', x: 1, y: 4, faction: 'player' },
+      { charId: 'cao_ren', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'cao_hong', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhao_yun',
+        enemyCharId: 'cao_hong',
+        dialogueLines: [
+          { speaker: '조홍', text: '상산 조자룡! 승상의 대군을 막아설 수 있겠느냐!' },
+          { speaker: '조운', text: '유현덕 주군을 지키기 위해서라면 천만 대군도 두렵지 않다!' },
+        ],
+        winner: 'player',
+        rewardExp: 110,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 5, y: 4, itemId: 'rice' },
+    ],
+    preBattleDialogue: [
+      { speaker: '조운', text: '주군! 상산 조자룡, 평생토록 주군 곁을 지키겠습니다!' },
+      { speaker: '유비', text: '자룡! 그대를 다시 만나니 천군만마를 얻은 것 같소!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '유비', text: '조인의 군세를 물리쳤으나 허창과의 거리가 너무 가깝소. 형주의 유표에게 향하자.' },
+    ],
+  },
+  // 16. 고성 전투 (의형제의 재회)
+  {
+    id: 16,
+    code: 'gucheng',
+    chapter: 2,
+    chapterTitle: '제2장: 관도대전과 방랑',
+    name: '고성 전투 (의형제의 재회)',
+    description: '오관참육장을 넘어온 관우를 오해한 장비가 북소리가 세 번 울리기 전에 조조의 장수 채양을 베라고 시험한다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '##############',
+      '#CCCCCCCCCCCC#',
+      '#C..........C#',
+      '#C.==....==.C#',
+      '#C.~~.VV.~~.C#',
+      '#C.~~.VV.~~.C#',
+      '#C.==....==.C#',
+      '#C..........C#',
+      '#CCCCCCCCCCCC#',
+      '##############',
+    ]),
+    maxTurns: 25,
+    victoryCondition: '채양 격파 (관우로 격파)',
+    defeatCondition: '관우의 퇴각',
+    playerDeploymentLimit: 5,
+    requiredPlayerCharIds: ["guan_yu"],
+    clearGold: 2200,
+    clearExpBonus: 140,
+    initialDeployments: [
+      { charId: 'guan_yu', x: 5, y: 4, faction: 'player', isCommander: true },
+      { charId: 'guan_ping', x: 4, y: 4, faction: 'player' },
+      { charId: 'zhou_cang', x: 4, y: 5, faction: 'player' },
+      { charId: 'zhang_fei', x: 2, y: 4, faction: 'ally', isCommander: true },
+      { charId: 'xiahou_yuan', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'li_dian', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'guan_yu',
+        enemyCharId: 'xiahou_yuan',
+        dialogueLines: [
+          { speaker: '적장', text: '조조 승상을 배신한 배은망덕한 관우 놈아!' },
+          { speaker: '관우', text: '형제와의 의리를 시험하려 들다니, 단 한 합에 베어주마!' },
+        ],
+        winner: 'player',
+        rewardExp: 150,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 6, y: 4, itemId: 'wine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '장비', text: '형님이라 부르지도 않겠소! 조조의 벼슬을 받고 부귀영화를 누리다 오지 않았소!' },
+      { speaker: '관우', text: '익덕아! 내 충절을 어찌 의심하느냐! 저 뒤따라온 적장을 베어 내 진심을 증명하겠다!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '장비', text: '흑흑... 둘째 형님! 제가 형님의 깊은 뜻을 몰라보고 큰 죄를 지었습니다!' },
+      { speaker: '유비', text: '아우들아! 마침내 우리 삼형제가 다시 하나가 되었구나!' },
+    ],
+  },
+  // 17. 강하 전투
+  {
+    id: 17,
+    code: 'jiangxia',
+    chapter: 2,
+    chapterTitle: '제2장: 관도대전과 방랑',
+    name: '강하 전투',
+    description: '강하의 반란군 장무와 진손을 토벌하고 주인을 구한다는 명마 적로(的盧)를 얻는다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '~~~~~~~~~~~~~~',
+      '~~~~~~==~~~~~~',
+      '..FF..==..FF..',
+      '..FF......FF..',
+      '....VV..VV....',
+      '....VV..VV....',
+      '..FF......FF..',
+      '..FF..==..FF..',
+      '~~~~~~==~~~~~~',
+      '~~~~~~~~~~~~~~',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '적 전멸',
+    defeatCondition: '유비의 퇴각',
+    playerDeploymentLimit: 7,
+    requiredPlayerCharIds: ["liu_bei"],
+    clearGold: 2400,
+    clearExpBonus: 150,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'guan_yu', x: 2, y: 3, faction: 'player' },
+      { charId: 'zhang_fei', x: 2, y: 5, faction: 'player' },
+      { charId: 'zhao_yun', x: 3, y: 4, faction: 'player' },
+      { charId: 'deng_mao', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'cheng_yuanzhi', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhao_yun',
+        enemyCharId: 'deng_mao',
+        dialogueLines: [
+          { speaker: '적장', text: '내 명마 적로를 넘보지 마라!' },
+          { speaker: '조운', text: '도적에게 어울리지 않는 명마다! 당장 말을 내려놓아라!' },
+        ],
+        winner: 'player',
+        rewardExp: 120,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 11, y: 4, itemId: 'hex_mark' },
+    ],
+    preBattleDialogue: [
+      { speaker: '유표', text: '현덕 아우, 강하의 반란군을 부디 진압해 주시오.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '조운', text: '주군, 노획한 백마의 이마에 흰 점이 박혀있어 적로라 불리는 명마입니다.' },
+      { speaker: '유비', text: '훌륭한 명마로다. 고맙소 자룡.' },
+    ],
+  },
+  // 18. 남양 전투
+  {
+    id: 18,
+    code: 'nanyang',
+    chapter: 2,
+    chapterTitle: '제2장: 관도대전과 방랑',
+    name: '남양 전투',
+    description: '조인의 군사 이전이 펼친 팔문금쇄진의 약점을 서서(단복)가 간파하여 조자룡이 진을 깨부순다.',
     width: 14,
     height: 10,
     mapData: generateMap([
       '..............',
-      '...FF....FF...',
       '..FFFF..FFFF..',
-      '~~~~~~~~~~~~~~',
-      '~~~~~~==~~~~~~',
-      '~~~~~~~~~~~~~~',
+      '..FF......FF..',
+      '....WWWWWW....',
+      '....WCCCCW....',
+      '....WCCCCW....',
+      '....WWWWWW....',
+      '..FF......FF..',
       '..FFFF..FFFF..',
-      '...FF....FF...',
       '..............',
-      'WWWWWWWWWWWWWW'
     ]),
-    maxTurns: 35,
-    victoryCondition: '유비와 민중의 탈출 또는 조조군 격퇴',
-    defeatCondition: '유비 또는 조운의 퇴각',
+    maxTurns: 30,
+    victoryCondition: '조인 격파 또는 적 전멸',
+    defeatCondition: '유비의 퇴각',
     playerDeploymentLimit: 7,
-    requiredPlayerCharIds: ['liu_bei', 'zhao_yun', 'zhang_fei'],
-    clearGold: 2000,
-    clearExpBonus: 150,
+    requiredPlayerCharIds: ["liu_bei"],
+    clearGold: 2500,
+    clearExpBonus: 160,
     initialDeployments: [
-      { charId: 'liu_bei', x: 12, y: 7, faction: 'player', isCommander: true },
-      { charId: 'zhang_fei', x: 6, y: 4, faction: 'player' }, // 장판교 위
-      { charId: 'zhao_yun', x: 3, y: 2, faction: 'player' },
-      { charId: 'cao_cao', x: 1, y: 1, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
-      { charId: 'zhang_liao', x: 2, y: 2, faction: 'enemy', aiType: 'aggressive' },
-      { charId: 'xu_chu', x: 1, y: 3, faction: 'enemy', aiType: 'aggressive' }
+      { charId: 'liu_bei', x: 1, y: 4, faction: 'player', isCommander: true },
+      { charId: 'guan_yu', x: 2, y: 3, faction: 'player' },
+      { charId: 'zhang_fei', x: 2, y: 5, faction: 'player' },
+      { charId: 'zhao_yun', x: 3, y: 4, faction: 'player' },
+      { charId: 'xu_shu', x: 1, y: 5, faction: 'player' },
+      { charId: 'cao_ren', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'li_dian', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'yu_jin', x: 10, y: 5, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhao_yun',
+        enemyCharId: 'li_dian',
+        dialogueLines: [
+          { speaker: '이전', text: '팔문금쇄진의 문을 뚫을 순 없다!' },
+          { speaker: '조운', text: '생문(生門)으로 들어가 경문(景門)으로 나오면 이 진은 무너진다!' },
+        ],
+        winner: 'player',
+        rewardExp: 130,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 7, y: 4, itemId: 'manual_sword' },
+    ],
+    preBattleDialogue: [
+      { speaker: '서서', text: '주군, 조인의 진형은 팔문금쇄진이나 중앙 주재 장수가 미숙합니다. 동남쪽 생문으로 돌입하십시오!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '조인', text: '팔문금쇄진이 파헤쳐지다니... 유비에게 비범한 군사가 있구나!' },
+    ],
+  },
+  // 19. 박망파 전투 (제갈량의 화계)
+  {
+    id: 19,
+    code: 'bowangpo',
+    chapter: 2,
+    chapterTitle: '제2장: 관도대전과 방랑',
+    name: '박망파 전투 (제갈량의 화계)',
+    description: '삼고초려로 모셔온 와룡 제갈공명이 검을 쥐고 첫 출진하여 하후돈의 10만 대군을 불길 속에 몰아넣는다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      'MMMMMMMMMMMMMM',
+      'MFFFFFFFFFFFFM',
+      'MFFFFFFFFFFFFM',
+      '..FFFF....FF..',
+      '..FFFF....FF..',
+      '..FFFF....FF..',
+      '..FFFF....FF..',
+      'MFFFFFFFFFFFFM',
+      'MFFFFFFFFFFFFM',
+      'MMMMMMMMMMMMMM',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '하후돈 격파',
+    defeatCondition: '유비 또는 제갈량의 퇴각',
+    playerDeploymentLimit: 7,
+    requiredPlayerCharIds: ["liu_bei","zhuge_liang"],
+    clearGold: 2600,
+    clearExpBonus: 170,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 1, y: 4, faction: 'player', isCommander: true },
+      { charId: 'zhuge_liang', x: 1, y: 5, faction: 'player' },
+      { charId: 'guan_yu', x: 4, y: 2, faction: 'player' },
+      { charId: 'zhang_fei', x: 4, y: 7, faction: 'player' },
+      { charId: 'zhao_yun', x: 5, y: 4, faction: 'player' },
+      { charId: 'xiahou_dun', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'yu_jin', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'li_dian', x: 10, y: 5, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'guan_yu',
+        enemyCharId: 'li_dian',
+        dialogueLines: [
+          { speaker: '이전', text: '골짜기가 좁고 숲이 빽빽하니 화공을 조심해야 한다!' },
+          { speaker: '관우', text: '이미 때가 늦었다! 불길이 솟구치리라!' },
+        ],
+        winner: 'player',
+        rewardExp: 120,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 6, y: 4, itemId: 'good_medicine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '장비', text: '군사라더니 물장난 불장난이나 하려는 것 아니오!' },
+      { speaker: '제갈량', text: '장군, 제 명을 따르지 않으시면 군율로 다스릴 것입니다.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '하후돈', text: '사방이 불바다로다! 퇴각하라!' },
+      { speaker: '관우', text: '군사의 신묘한 지략에 진심으로 탄복하였소.' },
+    ],
+  },
+  // 20. 신야 전투
+  {
+    id: 20,
+    code: 'xinye',
+    chapter: 2,
+    chapterTitle: '제2장: 관도대전과 방랑',
+    name: '신야 전투',
+    description: '조인이 보복을 위해 신야성으로 들이닥치자, 성을 비우고 화계와 백하의 수계로 조조군을 수장시킨다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '~~~~~~~~~~~~~~',
+      '~############~',
+      '~#CCCCCCCCCC#~',
+      '~#C...FF...C#~',
+      '~#C...FF...C#~',
+      '~#C...FF...C#~',
+      '~#CCCCCCCCCC#~',
+      '~######GG####~',
+      '..............',
+      '~~~~~~~~~~~~~~',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '조인 격파',
+    defeatCondition: '유비의 퇴각',
+    playerDeploymentLimit: 7,
+    requiredPlayerCharIds: ["liu_bei","zhuge_liang"],
+    clearGold: 2800,
+    clearExpBonus: 180,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 2, y: 8, faction: 'player', isCommander: true },
+      { charId: 'zhuge_liang', x: 3, y: 8, faction: 'player' },
+      { charId: 'guan_yu', x: 6, y: 1, faction: 'player' },
+      { charId: 'zhang_fei', x: 11, y: 8, faction: 'player' },
+      { charId: 'cao_ren', x: 6, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'cao_hong', x: 5, y: 4, faction: 'enemy', aiType: 'hold' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhang_fei',
+        enemyCharId: 'cao_hong',
+        dialogueLines: [
+          { speaker: '장비', text: '불에 데이고 물에 젖은 꼴이 볼만하구나!' },
+          { speaker: '조홍', text: '큭! 제갈량의 간계에 또 당하다니!' },
+        ],
+        winner: 'player',
+        rewardExp: 120,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 6, y: 3, itemId: 'meat' },
+    ],
+    preBattleDialogue: [
+      { speaker: '제갈량', text: '신야성을 비워 적을 유인한 뒤, 백하의 둑을 터뜨려 수몰시킬 것입니다.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '조인', text: '물과 불이 번갈아 닥치니 군사들이 버텨내질 못한다! 후퇴!' },
+    ],
+  },
+  // 21. 양양 전투
+  {
+    id: 21,
+    code: 'xiangyang',
+    chapter: 2,
+    chapterTitle: '제2장: 관도대전과 방랑',
+    name: '양양 전투',
+    description: '유표 사후 채모가 유종을 앞세워 조조에게 항복하고 성문을 닫아걸자, 유비가 백성들과 함께 도강한다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '##############',
+      '#CCCCCCCCCCCC#',
+      '#C..........C#',
+      '######GG######',
+      '..............',
+      '..............',
+      ',,...==...==,,',
+      ',,.~~~~...~~~~',
+      ',,.~~~~...~~~~',
+      '~~~~~~~~~~~~~~',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '채모 격파 또는 남쪽 다리 도하',
+    defeatCondition: '유비의 퇴각',
+    playerDeploymentLimit: 7,
+    requiredPlayerCharIds: ["liu_bei"],
+    clearGold: 2800,
+    clearExpBonus: 180,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 6, y: 5, faction: 'player', isCommander: true },
+      { charId: 'guan_yu', x: 5, y: 5, faction: 'player' },
+      { charId: 'zhang_fei', x: 7, y: 5, faction: 'player' },
+      { charId: 'cai_mao', x: 6, y: 2, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'wen_chou', x: 7, y: 2, faction: 'enemy', aiType: 'hold' },
+    ],
+    duels: [
+      {
+        playerCharId: 'guan_yu',
+        enemyCharId: 'cai_mao',
+        dialogueLines: [
+          { speaker: '관우', text: '주인을 배신하고 백성을 저버린 역적 놈아!' },
+          { speaker: '채모', text: '성문을 굳게 닫아라! 화살을 쏘아라!' },
+        ],
+        winner: 'player',
+        rewardExp: 100,
+        enemyRetreats: false
+      },
+    ],
+    treasures: [
+      { x: 3, y: 2, itemId: 'rice' },
+    ],
+    preBattleDialogue: [
+      { speaker: '유비', text: '채모가 성문을 닫았으니 무고한 백성들을 이끌고 강릉으로 향해야 하오.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '유비', text: '십만 백성들이 우리를 따르고 있소. 결코 백성들을 버리고 도망치지 않겠소.' },
+    ],
+  },
+  // 22. 당양 장판파 전투 1
+  {
+    id: 22,
+    code: 'changban_1',
+    chapter: 2,
+    chapterTitle: '제2장: 관도대전과 방랑',
+    name: '당양 장판파 전투 1',
+    description: '조조의 5천 철기병이 하루 밤낮을 달려 덮쳐오자, 조자룡이 백만 대군 속으로 단기필마 뛰어든다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '..FF......FF..',
+      '..FF.FFFF.FF..',
+      '....FFFFFF....',
+      '..............',
+      ',,,,..VV..,,,,',
+      ',,,,..VV..,,,,',
+      '..............',
+      '....FFFFFF....',
+      '..FF.FFFF.FF..',
+      '..FF......FF..',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '조운이 유비에게 도달 또는 적 선봉 격파',
+    defeatCondition: '조운 또는 유비의 퇴각',
+    playerDeploymentLimit: 6,
+    requiredPlayerCharIds: ["zhao_yun"],
+    clearGold: 3000,
+    clearExpBonus: 200,
+    initialDeployments: [
+      { charId: 'zhao_yun', x: 6, y: 4, faction: 'player', isCommander: true },
+      { charId: 'liu_bei', x: 1, y: 4, faction: 'player' },
+      { charId: 'xiahou_dun', x: 11, y: 3, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'xiahou_yuan', x: 11, y: 5, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'zhang_he', x: 12, y: 4, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhao_yun',
+        enemyCharId: 'xiahou_yuan',
+        dialogueLines: [
+          { speaker: '하후연', text: '아기를 품에 안고 어디를 빠져나가려 하느냐!' },
+          { speaker: '조운', text: '내 이름은 상산 조자룡이다! 비켜서지 않으면 베어버릴 것이다!' },
+        ],
+        winner: 'player',
+        rewardExp: 150,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 7, y: 4, itemId: 'blue_blade' },
+    ],
+    preBattleDialogue: [
+      { speaker: '조운', text: '어린 주군을 품에 안았으니 살아서 유현덕 주군을 뵈어야 한다!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '조운', text: '주군! 어린 아두 님을 무사히 구해왔습니다!' },
+      { speaker: '유비', text: '이 아이 하나 때문에 내 소중한 맹장을 잃을 뻔하였소!' },
+    ],
+  },
+  // 23. 당양 장판파 전투 2 (장비의 일갈)
+  {
+    id: 23,
+    code: 'changban_2',
+    chapter: 2,
+    chapterTitle: '제2장: 관도대전과 방랑',
+    name: '당양 장판파 전투 2 (장비의 일갈)',
+    description: '장판교 위에서 장비가 장팔사모를 비껴들고 호통을 치자, 조조의 백만 대군이 말머리를 돌린다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~',
+      '....==........',
+      '....==........',
+      '....==........',
+      '....==........',
+      '....==........',
+      '....==........',
+      '~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~',
+    ]),
+    maxTurns: 25,
+    victoryCondition: '장판교 사수 15턴 또는 적 격퇴',
+    defeatCondition: '장비의 퇴각',
+    playerDeploymentLimit: 5,
+    requiredPlayerCharIds: ["zhang_fei"],
+    clearGold: 3000,
+    clearExpBonus: 200,
+    initialDeployments: [
+      { charId: 'zhang_fei', x: 4, y: 4, faction: 'player', isCommander: true },
+      { charId: 'liu_bei', x: 1, y: 4, faction: 'player' },
+      { charId: 'cao_cao', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'xu_chu', x: 9, y: 3, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'zhang_liao', x: 9, y: 5, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'xiahou_dun', x: 10, y: 4, faction: 'enemy', aiType: 'aggressive' },
     ],
     duels: [
       {
         playerCharId: 'zhang_fei',
         enemyCharId: 'xu_chu',
         dialogueLines: [
-          { speaker: '장비', text: '내가 바로 연인 장익덕이다! 목숨이 아깝지 않은 놈은 덤벼라!' },
-          { speaker: '조조', text: '저자의 기세에 눌려 군사들이 간담이 서늘해졌구나... 전군 퇴각하라!' }
+          { speaker: '장비', text: '내가 바로 연인 장익덕이다! 목숨이 아깝지 않은 자는 나와 겨뤄보자!' },
+          { speaker: '허저', text: '으윽... 저 천둥 같은 고함 소리에 간담이 서늘하구나!' },
         ],
         winner: 'player',
-        rewardExp: 120,
-        enemyRetreats: false
-      }
+        rewardExp: 150,
+        enemyRetreats: true
+      },
     ],
     treasures: [
-      { x: 1, y: 2, itemId: 'blue_steel_sword' }
-    ]
+      { x: 4, y: 2, itemId: 'wine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '장비', text: '형님은 먼저 가십시오! 이 장판교는 내 시체를 넘지 않고는 지나갈 수 없소!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '조조', text: '장비 뒤편 숲에 흙먼지가 이는 것을 보니 복병이 분명하다! 전군 퇴각하라!' },
+    ],
   },
-
-  // ==================== 제3장: 적벽대전 & 형주 평정 ====================
+  // 24. 적벽 대전
   {
-    id: 12,
+    id: 24,
     code: 'chibi',
     chapter: 3,
-    chapterTitle: '제3장: 적벽대전 & 형주 평정',
+    chapterTitle: '제3장: 적벽대전과 형주 평정',
     name: '적벽 대전',
-    description: '동남풍이 불어오고 황개의 화선이 조조의 쇠사슬 연환 선단을 불바다로 만든다.',
+    description: '동남풍이 불어오자 황개의 화선이 조조의 쇠사슬 함선을 불태우고 장강이 불바다로 변한다.',
     width: 14,
     height: 10,
     mapData: generateMap([
       '~~~~~~~~~~~~~~',
       '~~~~~~~~~~~~~~',
-      '~~~~==~~~~~~~~',
-      '~~~~==~~~~~~~~',
-      '~~~~==~~~~~~~~',
-      '~~~~==~~~~~~~~',
+      '~~====~~====~~',
+      '~~====~~====~~',
+      '~~====~~====~~',
+      '~~====~~====~~',
+      '~~====~~====~~',
+      '~~====~~====~~',
       '~~~~~~~~~~~~~~',
-      '..FFFF..FFFF..',
-      '..FFFF..FFFF..',
-      '..............'
+      '~~~~~~~~~~~~~~',
     ]),
     maxTurns: 35,
-    victoryCondition: '조조의 대선단 격파 및 조조 추격',
-    defeatCondition: '유비의 퇴각',
+    victoryCondition: '조조 격파',
+    defeatCondition: '유비 또는 주유의 퇴각',
     playerDeploymentLimit: 8,
-    requiredPlayerCharIds: ['liu_bei', 'zhuge_liang'],
-    clearGold: 2500,
-    clearExpBonus: 180,
+    requiredPlayerCharIds: ["liu_bei","zhuge_liang"],
+    clearGold: 4000,
+    clearExpBonus: 250,
     initialDeployments: [
-      { charId: 'liu_bei', x: 2, y: 8, faction: 'player', isCommander: true },
-      { charId: 'zhuge_liang', x: 1, y: 8, faction: 'player' },
-      { charId: 'guan_yu', x: 4, y: 8, faction: 'player' },
-      { charId: 'zhang_fei', x: 5, y: 8, faction: 'player' },
-      { charId: 'zhou_yu', x: 8, y: 8, faction: 'ally' },
-      { charId: 'cao_cao', x: 6, y: 1, faction: 'enemy', isCommander: true, aiType: 'hold' },
-      { charId: 'zhang_liao', x: 5, y: 2, faction: 'enemy', aiType: 'aggressive' },
-      { charId: 'sima_yi', x: 7, y: 2, faction: 'enemy', aiType: 'hold' }
-    ]
+      { charId: 'liu_bei', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'zhuge_liang', x: 2, y: 5, faction: 'player' },
+      { charId: 'guan_yu', x: 3, y: 3, faction: 'player' },
+      { charId: 'zhang_fei', x: 3, y: 6, faction: 'player' },
+      { charId: 'zhou_yu', x: 4, y: 4, faction: 'ally', isCommander: true },
+      { charId: 'cao_cao', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'zhang_liao', x: 9, y: 3, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'xu_chu', x: 9, y: 5, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'guan_yu',
+        enemyCharId: 'zhang_liao',
+        dialogueLines: [
+          { speaker: '관우', text: '문원, 불길 속에서 살아남자꾸나!' },
+          { speaker: '장료', text: '승상을 모시고 반드시 살아서 돌아가겠소!' },
+        ],
+        winner: 'player',
+        rewardExp: 140,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 10, y: 4, itemId: 'elixir' },
+    ],
+    preBattleDialogue: [
+      { speaker: '주유', text: '동남풍이 불었다! 화선을 돌진시켜라!' },
+      { speaker: '조조', text: '사방이 불바다로다! 배들이 쇠사슬에 묶여 도망칠 수가 없다!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '조조', text: '적벽에서 백만 대군을 잃다니... 화용도를 거쳐 북으로 달아나라!' },
+    ],
   },
+  // 25. 화용도 전투
   {
-    id: 13,
-    code: 'changsha',
+    id: 25,
+    code: 'huayongdao',
     chapter: 3,
-    chapterTitle: '제3장: 적벽대전 & 형주 평정',
-    name: '장사 전투 (황충과 위연)',
-    description: '관우와 노장 황충의 백병전! 황충은 화살로 투구 끈만 맞추고, 위연이 한현을 베고 성문을 연다.',
+    chapterTitle: '제3장: 적벽대전과 형주 평정',
+    name: '화용도 전투',
+    description: '패주하던 조조가 화용도의 좁은 길목에 다다르자, 청룡도를 든 관운장이 길을 가로막아선다.',
     width: 14,
     height: 10,
     mapData: generateMap([
       'MMMMMMMMMMMMMM',
-      'M#CCCCCCCCCC#M',
-      'M#CB......BC#M',
-      'M#C...VV...C#M',
-      'M#C...VV...C#M',
-      'MM....GG....MM',
-      '..............',
-      '..FF......FF..',
-      '..FFFF..FFFF..',
-      'MMMMMMMMMMMMMM'
+      'M..SSSSSSSS..M',
+      'M.SSSSSSSSSS.M',
+      '..SS......SS..',
+      '..SS......SS..',
+      '..SS......SS..',
+      '..SS......SS..',
+      'M.SSSSSSSSSS.M',
+      'M..SSSSSSSS..M',
+      'MMMMMMMMMMMMMM',
     ]),
     maxTurns: 30,
-    victoryCondition: '한현 격파 또는 황충 설득',
-    defeatCondition: '유비 또는 관우의 퇴각',
+    victoryCondition: '조조 포위 또는 결착',
+    defeatCondition: '관우의 퇴각',
+    playerDeploymentLimit: 5,
+    requiredPlayerCharIds: ["guan_yu"],
+    clearGold: 3200,
+    clearExpBonus: 200,
+    initialDeployments: [
+      { charId: 'guan_yu', x: 6, y: 4, faction: 'player', isCommander: true },
+      { charId: 'guan_ping', x: 5, y: 4, faction: 'player' },
+      { charId: 'zhou_cang', x: 7, y: 4, faction: 'player' },
+      { charId: 'cao_cao', x: 1, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'zhang_liao', x: 2, y: 4, faction: 'enemy', aiType: 'hold' },
+      { charId: 'xu_chu', x: 2, y: 5, faction: 'enemy', aiType: 'hold' },
+    ],
+    duels: [
+      {
+        playerCharId: 'guan_yu',
+        enemyCharId: 'cao_cao',
+        dialogueLines: [
+          { speaker: '조조', text: '운장, 옛날 백마와 연진에서의 정을 잊었소?' },
+          { speaker: '관우', text: '조맹덕... 은혜는 갚았으나 오늘 사로잡지 않을 수 없소.' },
+          { speaker: '조조', text: '장수로서 의리를 중히 여기는 운장께서 부디 이 늙은 조조의 길을 열어주시오...' },
+        ],
+        winner: 'player',
+        rewardExp: 150,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 12, y: 4, itemId: 'good_medicine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '조조', text: '제갈량과 주유 놈도 무능하구나! 이곳에 복병 하나 두지 않다니! 으하하!' },
+      { speaker: '관우', text: '조맹덕! 관운장이 오래전부터 기다리고 있었다!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '관우', text: '군령장을 썼으나... 옛 정을 차마 저버릴 수 없구려. 가시오 조맹덕!' },
+    ],
+  },
+  // 26. 강릉 전투
+  {
+    id: 26,
+    code: 'jiangling',
+    chapter: 3,
+    chapterTitle: '제3장: 적벽대전과 형주 평정',
+    name: '강릉 전투',
+    description: '주유와 조인이 남군과 강릉에서 일진일퇴를 거듭하는 틈을 타 제갈량의 밀명으로 강릉을 차지한다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '##############',
+      '#CCCCCCCCCCCC#',
+      '#C....TT....C#',
+      '#C.BB....BB.C#',
+      '#C..........C#',
+      '#C..........C#',
+      '#C.BB....BB.C#',
+      '#C....TT....C#',
+      '#CCCCCCCCCCCC#',
+      '######GG######',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '조인 격파 및 성 점령',
+    defeatCondition: '유비의 퇴각',
     playerDeploymentLimit: 7,
-    requiredPlayerCharIds: ['liu_bei', 'guan_yu'],
-    clearGold: 2200,
-    clearExpBonus: 160,
+    requiredPlayerCharIds: ["liu_bei"],
+    clearGold: 3200,
+    clearExpBonus: 200,
     initialDeployments: [
       { charId: 'liu_bei', x: 6, y: 8, faction: 'player', isCommander: true },
-      { charId: 'guan_yu', x: 6, y: 6, faction: 'player' },
-      { charId: 'zhang_fei', x: 4, y: 7, faction: 'player' },
-      { charId: 'huang_zhong', x: 6, y: 3, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
-      { charId: 'wei_yan', x: 7, y: 3, faction: 'enemy', aiType: 'hold' }
+      { charId: 'zhao_yun', x: 5, y: 8, faction: 'player' },
+      { charId: 'zhang_fei', x: 7, y: 8, faction: 'player' },
+      { charId: 'cao_ren', x: 6, y: 3, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'cao_hong', x: 5, y: 4, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhao_yun',
+        enemyCharId: 'cao_ren',
+        dialogueLines: [
+          { speaker: '조인', text: '남군성은 결코 내어줄 수 없다!' },
+          { speaker: '조운', text: '이미 주공의 군세가 성을 포위했다!' },
+        ],
+        winner: 'player',
+        rewardExp: 130,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 5, y: 2, itemId: 'manual_bow' },
+    ],
+    preBattleDialogue: [
+      { speaker: '제갈량', text: '주유가 피 흘려 힘을 뺀 지금이야말로 강릉을 취할 절호의 기회입니다.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '유비', text: '마침내 강릉을 얻어 형주 평정의 거점을 마련하였소!' },
+    ],
+  },
+  // 27. 영릉 전투
+  {
+    id: 27,
+    code: 'lingling',
+    chapter: 3,
+    chapterTitle: '제3장: 적벽대전과 형주 평정',
+    name: '영릉 전투',
+    description: '형주 4군 정벌의 첫걸음. 영릉태수 유도의 맹장 형도영이 개산대부를 휘두르며 맞선다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      'MMMM......MMMM',
+      'M..FF....FF..M',
+      '..FFFF..FFFF..',
+      '..FF......FF..',
+      '....VV..VV....',
+      '....VV..VV....',
+      '..FF......FF..',
+      '..FFFF..FFFF..',
+      'M..FF....FF..M',
+      'MMMM......MMMM',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '형도영 격파 및 유도 항복',
+    defeatCondition: '유비의 퇴각',
+    playerDeploymentLimit: 7,
+    requiredPlayerCharIds: ["liu_bei"],
+    clearGold: 3000,
+    clearExpBonus: 190,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'zhang_fei', x: 3, y: 3, faction: 'player' },
+      { charId: 'zhao_yun', x: 3, y: 5, faction: 'player' },
+      { charId: 'xing_daorong', x: 10, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'liu_du', x: 12, y: 4, faction: 'enemy', aiType: 'hold' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhang_fei',
+        enemyCharId: 'xing_daorong',
+        dialogueLines: [
+          { speaker: '형도영', text: '내가 바로 영릉의 제일 맹장 형도영이다!' },
+          { speaker: '장비', text: '하룻강아지 범 무서운 줄 모른다더니 내 장팔사모나 받아라!' },
+        ],
+        winner: 'player',
+        rewardExp: 130,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 11, y: 2, itemId: 'rice' },
+    ],
+    preBattleDialogue: [
+      { speaker: '형도영', text: '제갈량의 꾀 따위 내 큰 도끼 한 자루면 산산조각 날 것이다!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '유도', text: '유현덕 공의 인덕에 감복하여 항복하옵니다.' },
+    ],
+  },
+  // 28. 계양 전투
+  {
+    id: 28,
+    code: 'guiyang',
+    chapter: 3,
+    chapterTitle: '제3장: 적벽대전과 형주 평정',
+    name: '계양 전투',
+    description: '조운이 3천 군사로 계양을 공략하자, 조범이 항복하고 번씨와의 혼인을 권하나 조운이 거절한다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '..............',
+      '..FF.FFFF.FF..',
+      '..FF.FFFF.FF..',
+      '....FFFFFF....',
+      '....WWCCWW....',
+      '....WWCCWW....',
+      '....FFFFFF....',
+      '..FF.FFFF.FF..',
+      '..FF.FFFF.FF..',
+      '..............',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '조범 항복 및 적 전멸',
+    defeatCondition: '조운의 퇴각',
+    playerDeploymentLimit: 6,
+    requiredPlayerCharIds: ["zhao_yun"],
+    clearGold: 3000,
+    clearExpBonus: 190,
+    initialDeployments: [
+      { charId: 'zhao_yun', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'jian_yong', x: 1, y: 4, faction: 'player' },
+      { charId: 'zhao_fan', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'deng_mao', x: 9, y: 3, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhao_yun',
+        enemyCharId: 'deng_mao',
+        dialogueLines: [
+          { speaker: '조운', text: '헛되이 피를 흘리지 말고 항복하라!' },
+          { speaker: '적장', text: '조자룡의 창끝이 번개 같구나!' },
+        ],
+        winner: 'player',
+        rewardExp: 120,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 7, y: 4, itemId: 'good_medicine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '조운', text: '계양의 백성들에게 피해가 가지 않도록 신속히 성을 공략하겠다.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '조범', text: '자룡 장군의 청렴결백함과 충절에 고개 숙여 경의를 표합니다.' },
+    ],
+  },
+  // 29. 무릉 전투
+  {
+    id: 29,
+    code: 'wuling',
+    chapter: 3,
+    chapterTitle: '제3장: 적벽대전과 형주 평정',
+    name: '무릉 전투',
+    description: '장비가 군사를 이끌고 무릉으로 진격하자 태수 금선이 맞서 싸우나 부하 공지가 성문을 연다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      'MMMM......MMMM',
+      'MM..FF..FF..MM',
+      '..FFFF..FFFF..',
+      '..FF......FF..',
+      '....==..==....',
+      '....==..==....',
+      '..FF......FF..',
+      '..FFFF..FFFF..',
+      'MM..FF..FF..MM',
+      'MMMM......MMMM',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '금선 격파',
+    defeatCondition: '장비의 퇴각',
+    playerDeploymentLimit: 6,
+    requiredPlayerCharIds: ["zhang_fei"],
+    clearGold: 3000,
+    clearExpBonus: 190,
+    initialDeployments: [
+      { charId: 'zhang_fei', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'fan_gong', x: 1, y: 4, faction: 'player' },
+      { charId: 'jin_xuan', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'cheng_yuanzhi', x: 9, y: 4, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhang_fei',
+        enemyCharId: 'jin_xuan',
+        dialogueLines: [
+          { speaker: '장비', text: '무릉태수 금선아! 연인 장익덕이 왔다!' },
+          { speaker: '금선', text: '으악! 저 흑표범 같은 장수가 장비란 말인가!' },
+        ],
+        winner: 'player',
+        rewardExp: 120,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 11, y: 2, itemId: 'rice' },
+    ],
+    preBattleDialogue: [
+      { speaker: '장비', text: '형님, 내 장사꾼 둘째 형님보다 먼저 무릉을 접수하고 오겠소!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '장비', text: '으하하! 무릉도 우리 손에 들어왔다!' },
+    ],
+  },
+  // 30. 장사 전투
+  {
+    id: 30,
+    code: 'changsha',
+    chapter: 3,
+    chapterTitle: '제3장: 적벽대전과 형주 평정',
+    name: '장사 전투',
+    description: '백발의 노장 황충과 관우가 일도양단의 명승부를 펼치고, 위연이 의거를 일으켜 한현을 처단한다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '##############',
+      '#CCCCCCCCCCCC#',
+      '#C....TT....C#',
+      '#C.==....==.C#',
+      '#C.~~.VV.~~.C#',
+      '#C.~~.VV.~~.C#',
+      '#C.==....==.C#',
+      '#C....TT....C#',
+      '#CCCCCCCCCCCC#',
+      '######GG######',
+    ]),
+    maxTurns: 35,
+    victoryCondition: '한현 처단 및 황충/위연 귀순',
+    defeatCondition: '관우의 퇴각',
+    playerDeploymentLimit: 7,
+    requiredPlayerCharIds: ["guan_yu"],
+    clearGold: 3500,
+    clearExpBonus: 220,
+    initialDeployments: [
+      { charId: 'guan_yu', x: 6, y: 8, faction: 'player', isCommander: true },
+      { charId: 'guan_ping', x: 5, y: 8, faction: 'player' },
+      { charId: 'zhou_cang', x: 7, y: 8, faction: 'player' },
+      { charId: 'han_xuan', x: 6, y: 2, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'huang_zhong', x: 6, y: 5, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'wei_yan', x: 7, y: 4, faction: 'enemy', aiType: 'hold' },
     ],
     duels: [
       {
         playerCharId: 'guan_yu',
         enemyCharId: 'huang_zhong',
         dialogueLines: [
-          { speaker: '관우', text: '노익장의 궁술과 칼솜씨가 과연 천하에 짝이 없구려!' },
-          { speaker: '황충', text: '관공의 청룡도에 깃든 의기를 보았소. 내 활시위를 거두겠소.' }
+          { speaker: '황충', text: '관운장! 늙었다고 얕보지 마라!' },
+          { speaker: '관우', text: '백발이 성성함에도 칼끝에 서린 기운이 참으로 맹렬하오!' },
+          { speaker: '황충', text: '말이 헛디뎌 낙마했거늘 어찌 베지 않는 것이오!' },
+          { speaker: '관우', text: '어찌 낙마한 장수를 베겠소. 말 갈아타고 다시 오시오!' },
+        ],
+        winner: 'player',
+        rewardExp: 150,
+        enemyRetreats: false
+      },
+    ],
+    treasures: [
+      { x: 4, y: 2, itemId: 'repeater_bow' },
+      { x: 8, y: 2, itemId: 'good_medicine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '관우', text: '장사의 황충은 백발의 명장이니 예의를 다해 상대할 것이오.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '위연', text: '한현의 목을 베어 의기를 바치오! 유황숙을 주군으로 모시겠소!' },
+      { speaker: '황충', text: '운장 공의 의기에 탄복하여 노구를 이끌고 충성을 맹세하오.' },
+    ],
+  },
+  // 31. 부수관 전투
+  {
+    id: 31,
+    code: 'fushui_pass',
+    chapter: 4,
+    chapterTitle: '제4장: 한중 쟁탈전과 익주 평정',
+    name: '부수관 전투',
+    description: '유비의 입촉을 방해하려는 유장의 장수 양회와 고패를 연회에서 참수하고 부수관을 단숨에 함락한다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      'MMMMMMMMMMMMMM',
+      'MM..FF..W.GMMM',
+      'M..FFF...WW#MM',
+      '..FFFF....W#CM',
+      ',,...==...W#CM',
+      ',,.~~~~...W#CM',
+      ',..FFF....W#BM',
+      'M..FF...WWW#MM',
+      'MM...WWWWW.GMM',
+      'MMMMMMMMMMMMMM',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '관문 점령 및 적 전멸',
+    defeatCondition: '유비의 퇴각',
+    playerDeploymentLimit: 7,
+    requiredPlayerCharIds: ["liu_bei","pang_tong"],
+    clearGold: 3500,
+    clearExpBonus: 220,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 1, y: 4, faction: 'player', isCommander: true },
+      { charId: 'pang_tong', x: 1, y: 5, faction: 'player' },
+      { charId: 'huang_zhong', x: 2, y: 3, faction: 'player' },
+      { charId: 'wei_yan', x: 2, y: 5, faction: 'player' },
+      { charId: 'deng_mao', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+    ],
+    duels: [
+      {
+        playerCharId: 'wei_yan',
+        enemyCharId: 'deng_mao',
+        dialogueLines: [
+          { speaker: '위연', text: '간사한 역적 놈들! 방통 군사의 계책에 이미 걸려들었거늘!' },
         ],
         winner: 'player',
         rewardExp: 120,
         enemyRetreats: true
-      }
-    ]
+      },
+    ],
+    treasures: [
+      { x: 12, y: 3, itemId: 'meat' },
+    ],
+    preBattleDialogue: [
+      { speaker: '방통', text: '주군, 양회와 고패의 역모를 단칼에 베고 익주 평정의 첫 관문을 여십시오.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '유비', text: '부수관을 얻었으니 이제 성도로 진격할 길이 열렸소.' },
+    ],
   },
-
-  // ==================== 제4장: 익주 공략 & 한중 쟁패 ====================
+  // 32. 낙성 전투 (낙봉파)
   {
-    id: 14,
-    code: 'luofengpo',
+    id: 32,
+    code: 'luocheng',
     chapter: 4,
-    chapterTitle: '제4장: 익주 공략 & 한중 쟁패',
-    name: '낙봉파 전투 (방통 구출)',
-    description: '장임의 복병이 낙봉파에서 방통을 노린다. 유비군은 신속히 방통을 구출해야 한다.',
+    chapterTitle: '제4장: 한중 쟁탈전과 익주 평정',
+    name: '낙성 전투 (낙봉파)',
+    description: '익주의 맹장 장임이 좁은 골짜기 낙봉파에 매복하여 화살을 퍼붓자, 방통을 구하기 위해 필사의 사투를 벌인다.',
     width: 14,
     height: 10,
     mapData: generateMap([
       'MMMMMMMMMMMMMM',
-      'MMMM..WW..MMMM',
-      'MMM..WWWW..MMM',
-      'MM..WWWWWW..MM',
-      'M..WWWWWWWW..M',
-      'M..WWWWWWWW..M',
-      'MM..WWWWWW..MM',
-      'MMM..WWWW..MMM',
-      'MMMM..WW..MMMM',
-      'MMMMMMMMMMMMMM'
-    ]),
-    maxTurns: 25,
-    victoryCondition: '장임 격파 및 방통 구출',
-    defeatCondition: '유비 또는 방통의 퇴각',
-    playerDeploymentLimit: 7,
-    requiredPlayerCharIds: ['liu_bei', 'pang_tong'],
-    clearGold: 2400,
-    clearExpBonus: 180,
-    initialDeployments: [
-      { charId: 'liu_bei', x: 2, y: 4, faction: 'player', isCommander: true },
-      { charId: 'pang_tong', x: 4, y: 4, faction: 'player' },
-      { charId: 'zhao_yun', x: 2, y: 5, faction: 'player' },
-      { charId: 'fan_gong', x: 2, y: 3, faction: 'player' },
-      { charId: 'deng_mao', x: 8, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
-      { charId: 'cheng_yuanzhi', x: 8, y: 5, faction: 'enemy', aiType: 'aggressive' }
-    ]
-  },
-  {
-    id: 15,
-    code: 'dingjun',
-    chapter: 4,
-    chapterTitle: '제4장: 익주 공략 & 한중 쟁패',
-    name: '정군산 전투',
-    description: '법정의 책략에 따라 높은 고지를 선점한 황충이 번개처럼 말을 몰아 하후연을 참살한다.',
-    width: 14,
-    height: 10,
-    mapData: generateMap([
+      'MFFFFFFFFFFFFM',
+      'M..TT....TT..M',
+      '..FFFF..FFFF..',
+      '..FF......FF..',
+      '..FF......FF..',
+      '..FFFF..FFFF..',
+      'M..TT....TT..M',
+      'MFFFFFFFFFFFFM',
       'MMMMMMMMMMMMMM',
-      'MMMM..MM..MMMM',
-      'MMM..MMMM..MMM',
-      'MM..MMMMMM..MM',
-      '..MMMMMMMMMM..',
-      '..MMMMMMMMMM..',
-      'MM..MMMMMM..MM',
-      'MMM..MMMM..MMM',
-      'MMMM..MM..MMMM',
-      'MMMMMMMMMMMMMM'
     ]),
     maxTurns: 30,
-    victoryCondition: '하후연 격파',
+    victoryCondition: '장임 격파 및 방통 구출',
     defeatCondition: '유비의 퇴각',
     playerDeploymentLimit: 8,
-    requiredPlayerCharIds: ['liu_bei', 'huang_zhong'],
-    clearGold: 2800,
-    clearExpBonus: 200,
+    requiredPlayerCharIds: ["liu_bei","pang_tong"],
+    clearGold: 3800,
+    clearExpBonus: 240,
+    initialDeployments: [
+      { charId: 'pang_tong', x: 6, y: 4, faction: 'player', isCommander: true },
+      { charId: 'wei_yan', x: 5, y: 4, faction: 'player' },
+      { charId: 'huang_zhong', x: 5, y: 5, faction: 'player' },
+      { charId: 'liu_bei', x: 1, y: 4, faction: 'player' },
+      { charId: 'zhang_ren', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'wu_yi', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'huang_zhong',
+        enemyCharId: 'zhang_ren',
+        dialogueLines: [
+          { speaker: '장임', text: '낙봉파는 봉황이 떨어지는 곳! 방통의 목숨은 여기서 끝이다!' },
+          { speaker: '황충', text: '노장의 백발백중 활시위를 맛보아라!' },
+        ],
+        winner: 'player',
+        rewardExp: 140,
+        enemyRetreats: false
+      },
+    ],
+    treasures: [
+      { x: 3, y: 2, itemId: 'good_medicine' },
+      { x: 9, y: 7, itemId: 'manual_horse' },
+    ],
+    preBattleDialogue: [
+      { speaker: '방통', text: '이곳의 지명이 낙봉파(落鳳坡)라고?! 봉추(鳳雛)인 나의 운명이 불길하구나!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '유비', text: '방통 군사! 다행히 무사히 구출하였소! 형주에 계신 제갈 군사에게 구원을 청합시다.' },
+    ],
+  },
+  // 33. 가맹관 전투
+  {
+    id: 33,
+    code: 'jiameng_pass',
+    chapter: 4,
+    chapterTitle: '제4장: 한중 쟁탈전과 익주 평정',
+    name: '가맹관 전투',
+    description: '서량의 금마초가 장로의 명을 받고 가맹관을 맹공하자, 장비가 횃불을 밝히며 밤샘 일기토를 벌인다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      'MMMMMMMMMMMMMM',
+      'MM..FF..W.GMMM',
+      'M..FFF...WW#MM',
+      '..FFFF....W#CM',
+      ',,...==...W#CM',
+      ',,.~~~~...W#CM',
+      ',..FFF....W#BM',
+      'M..FF...WWW#MM',
+      'MM...WWWWW.GMM',
+      'MMMMMMMMMMMMMM',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '마초 격파 및 회유',
+    defeatCondition: '유비 또는 장비의 퇴각',
+    playerDeploymentLimit: 7,
+    requiredPlayerCharIds: ["liu_bei","zhang_fei"],
+    clearGold: 4000,
+    clearExpBonus: 250,
     initialDeployments: [
       { charId: 'liu_bei', x: 2, y: 4, faction: 'player', isCommander: true },
-      { charId: 'huang_zhong', x: 4, y: 4, faction: 'player' },
-      { charId: 'fa_zheng', x: 2, y: 3, faction: 'player' },
-      { charId: 'xiahou_yuan', x: 10, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
-      { charId: 'zhang_he', x: 10, y: 5, faction: 'enemy', aiType: 'aggressive' }
+      { charId: 'zhang_fei', x: 5, y: 4, faction: 'player' },
+      { charId: 'wei_yan', x: 3, y: 5, faction: 'player' },
+      { charId: 'ma_chao', x: 9, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'ma_dai', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhang_fei',
+        enemyCharId: 'ma_chao',
+        dialogueLines: [
+          { speaker: '마초', text: '서량의 금마초가 여기 있다! 네 놈이 연인 장익덕이냐!' },
+          { speaker: '장비', text: '백 합을 겨뤄도 승부가 나지 않으니 투구를 벗고 횃불 아래서 다시 겨루자!' },
+          { speaker: '마초', text: '바라던 바다! 천하의 호걸이로다!' },
+        ],
+        winner: 'player',
+        rewardExp: 180,
+        enemyRetreats: false
+      },
+    ],
+    treasures: [
+      { x: 12, y: 3, itemId: 'wine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '제갈량', text: '마초의 용맹은 여포에 버금갑니다. 장비 장군이 아니면 맞설 자가 없습니다.' },
+      { speaker: '장비', text: '군사! 내가 서량 놈을 박살 내고 오겠소!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '마초', text: '유현덕 주군의 인덕과 대의에 감복하였소. 서량의 칼날을 바치겠소!' },
+    ],
+  },
+  // 34. 성도 전투 (익주 평정)
+  {
+    id: 34,
+    code: 'chengdu',
+    chapter: 4,
+    chapterTitle: '제4장: 한중 쟁탈전과 익주 평정',
+    name: '성도 전투 (익주 평정)',
+    description: '마초의 귀순 소식에 유장이 성문을 열고 항복하자, 유비가 익주를 평정하고 촉한 건국의 기틀을 세운다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '##############',
+      '#CCCCCCCCCCCC#',
+      '#C....TT....C#',
+      '#C.BB....BB.C#',
+      '#C..........C#',
+      '#C..........C#',
+      '#C.BB....BB.C#',
+      '#C....TT....C#',
+      '#CCCCCCCCCCCC#',
+      '######GG######',
+    ]),
+    maxTurns: 35,
+    victoryCondition: '성도 점령 및 유장 항복',
+    defeatCondition: '유비의 퇴각',
+    playerDeploymentLimit: 8,
+    requiredPlayerCharIds: ["liu_bei","zhuge_liang"],
+    clearGold: 4500,
+    clearExpBonus: 280,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 6, y: 8, faction: 'player', isCommander: true },
+      { charId: 'zhuge_liang', x: 5, y: 8, faction: 'player' },
+      { charId: 'zhang_fei', x: 7, y: 8, faction: 'player' },
+      { charId: 'ma_chao', x: 4, y: 8, faction: 'player' },
+      { charId: 'liu_zhang', x: 6, y: 3, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'wu_yi', x: 5, y: 4, faction: 'enemy', aiType: 'hold' },
+    ],
+    duels: [
+      {
+        playerCharId: 'ma_chao',
+        enemyCharId: 'wu_yi',
+        dialogueLines: [
+          { speaker: '마초', text: '마맹기가 유현덕 주군을 모시기로 하였다! 성문을 열어라!' },
+          { speaker: '오의', text: '마초 장군마저... 대세를 거스를 수 없구나!' },
+        ],
+        winner: 'player',
+        rewardExp: 140,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 4, y: 2, itemId: 'art_of_war' },
+      { x: 8, y: 2, itemId: 'elixir' },
+    ],
+    preBattleDialogue: [
+      { speaker: '유비', text: '백성들이 피를 흘리지 않도록 유장 형님께 항복을 권유하시오.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '유장', text: '내가 무능하여 백성을 돌보지 못했소. 익주의 땅과 백성을 현덕 공께 맡깁니다.' },
+      { speaker: '유비', text: '천하를 도탄에서 구하고 한실을 부흥시키겠소!' },
+    ],
+  },
+  // 35. 와구관 전투
+  {
+    id: 35,
+    code: 'wagou_pass',
+    chapter: 4,
+    chapterTitle: '제4장: 한중 쟁탈전과 익주 평정',
+    name: '와구관 전투',
+    description: '장합이 파서로 쳐들어오자, 장비가 술에 취한 척 거짓 연극을 펼쳐 장합의 본진을 기습 격멸한다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      'MMMMMMMMMMMMMM',
+      'MM..FF..W.GMMM',
+      'M..FFF...WW#MM',
+      '..FFFF....W#CM',
+      ',,...==...W#CM',
+      ',,.~~~~...W#CM',
+      ',..FFF....W#BM',
+      'M..FF...WWW#MM',
+      'MM...WWWWW.GMM',
+      'MMMMMMMMMMMMMM',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '장합 격파',
+    defeatCondition: '장비의 퇴각',
+    playerDeploymentLimit: 7,
+    requiredPlayerCharIds: ["zhang_fei"],
+    clearGold: 4200,
+    clearExpBonus: 260,
+    initialDeployments: [
+      { charId: 'zhang_fei', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'wei_yan', x: 3, y: 5, faction: 'player' },
+      { charId: 'zhang_he', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'xiahou_dun', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhang_fei',
+        enemyCharId: 'zhang_he',
+        dialogueLines: [
+          { speaker: '장합', text: '술주정뱅이 놈이 진중에서 술만 퍼마시더니!' },
+          { speaker: '장비', text: '으하하! 네 놈을 꾀어내기 위한 연극이었다! 내 사모를 받아라!' },
+        ],
+        winner: 'player',
+        rewardExp: 160,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 12, y: 3, itemId: 'wine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '장합', text: '장비 놈이 날마다 술을 마신다니 오늘 밤 야습으로 끝내버리겠다!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '장비', text: '장합 놈아, 다시는 장익덕을 무식하다고 놀리지 마라!' },
+    ],
+  },
+  // 36. 정군산 전투
+  {
+    id: 36,
+    code: 'dingjunshan',
+    chapter: 4,
+    chapterTitle: '제4장: 한중 쟁탈전과 익주 평정',
+    name: '정군산 전투',
+    description: '법정의 깃발 신호에 맞춰 산 정상에서 내달린 노장 황충이 위나라 총사령관 하후연을 일도양단한다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      'MMMMMMMMMMMMMM',
+      'MM..MMMM..MMMM',
+      'M.FF..MM..FF.M',
+      '..FFFF..FFFF..',
+      '..FF..VV..FF..',
+      '..FF..VV..FF..',
+      '..FFFF..FFFF..',
+      'M.FF..MM..FF.M',
+      'MM..MMMM..MMMM',
+      'MMMMMMMMMMMMMM',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '하후연 참수',
+    defeatCondition: '황충 또는 유비의 퇴각',
+    playerDeploymentLimit: 8,
+    requiredPlayerCharIds: ["huang_zhong","fa_zheng"],
+    clearGold: 4500,
+    clearExpBonus: 300,
+    initialDeployments: [
+      { charId: 'huang_zhong', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'fa_zheng', x: 1, y: 4, faction: 'player' },
+      { charId: 'zhao_yun', x: 2, y: 5, faction: 'player' },
+      { charId: 'xiahou_yuan', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'zhang_he', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'cao_hong', x: 10, y: 5, faction: 'enemy', aiType: 'aggressive' },
     ],
     duels: [
       {
         playerCharId: 'huang_zhong',
         enemyCharId: 'xiahou_yuan',
         dialogueLines: [
-          { speaker: '하후연', text: '늙은이가 감히 내 진영으로 뛰어들다니!' },
-          { speaker: '황충', text: '내 칼끝이 번개보다 빠름을 보여주마! 받거라!' }
+          { speaker: '법정', text: '황 장군, 지금입니다! 백기를 흔듭니다!' },
+          { speaker: '황충', text: '우오오옷! 하후연 네 놈의 목을 베겠다!' },
+          { speaker: '하후연', text: '크아악! 이 늙은이의 칼이 어찌 이리 빠른가...!' },
+        ],
+        winner: 'player',
+        rewardExp: 200,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 11, y: 2, itemId: 'iron_spear' },
+      { x: 11, y: 6, itemId: 'good_medicine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '법정', text: '산을 점령하고 내려다보며 적이 방심했을 때 단숨에 내려쳐야 합니다.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '유비', text: '하후연을 베었으니 한중은 이미 우리 손에 들어왔소!' },
+    ],
+  },
+  // 37. 한수 전투 (조운의 공성계)
+  {
+    id: 37,
+    code: 'hanshui',
+    chapter: 4,
+    chapterTitle: '제4장: 한중 쟁탈전과 익주 평정',
+    name: '한수 전투 (조운의 공성계)',
+    description: '황충을 구출한 조운이 진영의 문을 활짝 열고 홀로 서서 조조의 대군을 공성계로 물리친다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '~~~~~~~~~~~~~~',
+      '~~~~~~==~~~~~~',
+      '..FF..==..FF..',
+      '..FF......FF..',
+      '....VV..VV....',
+      '....VV..VV....',
+      '..FF......FF..',
+      '..FF..==..FF..',
+      '~~~~~~==~~~~~~',
+      '~~~~~~~~~~~~~~',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '조조군 격퇴',
+    defeatCondition: '조운의 퇴각',
+    playerDeploymentLimit: 7,
+    requiredPlayerCharIds: ["zhao_yun"],
+    clearGold: 4500,
+    clearExpBonus: 280,
+    initialDeployments: [
+      { charId: 'zhao_yun', x: 4, y: 4, faction: 'player', isCommander: true },
+      { charId: 'huang_zhong', x: 3, y: 4, faction: 'player' },
+      { charId: 'cao_cao', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'xu_chu', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'zhang_he', x: 10, y: 5, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhao_yun',
+        enemyCharId: 'zhang_he',
+        dialogueLines: [
+          { speaker: '장합', text: '조자룡! 이곳이 네 놈의 무덤이다!' },
+          { speaker: '조운', text: '온몸이 담력으로 찬 나 조자룡을 막을 수 있겠느냐!' },
         ],
         winner: 'player',
         rewardExp: 150,
         enemyRetreats: true
-      }
-    ]
+      },
+    ],
+    treasures: [
+      { x: 5, y: 4, itemId: 'good_medicine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '조운', text: '영채 문을 활짝 열고 깃발을 눕혀라. 북과 쇠북 소리로 적을 혼란에 빠뜨리겠다.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '유비', text: '자룡은 일신이 모두 담덩어리로다! (子龍一身都是膽也)' },
+    ],
   },
+  // 38. 양평관 전투
   {
-    id: 16,
-    code: 'fancheng',
+    id: 38,
+    code: 'yangping_pass',
     chapter: 4,
-    chapterTitle: '제4장: 익주 공략 & 한중 쟁패',
-    name: '번성 전투 (관우의 수공)',
-    description: '관우가 한수를 터뜨려 우금의 7군을 수몰시키고 방덕을 사로잡으며 위진화하의 위세를 떨친다.',
-    width: 14,
-    height: 10,
-    mapData: generateMap([
-      '~~~~~~~~~~~~~~',
-      '~~~~~~~~~~~~~~',
-      'SSSSSSSSSSSSSS',
-      'S##GG####GG##S',
-      'S#CCCCCCCCCC#S',
-      'S#CCCCCCCCCC#S',
-      'S##GG####GG##S',
-      'SSSSSSSSSSSSSS',
-      '~~~~~~~~~~~~~~',
-      '~~~~~~~~~~~~~~'
-    ]),
-    maxTurns: 30,
-    victoryCondition: '조인 격파',
-    defeatCondition: '관우의 퇴각',
-    playerDeploymentLimit: 6,
-    requiredPlayerCharIds: ['guan_yu'],
-    clearGold: 3000,
-    clearExpBonus: 220,
-    initialDeployments: [
-      { charId: 'guan_yu', x: 2, y: 4, faction: 'player', isCommander: true },
-      { charId: 'guan_ping', x: 2, y: 3, faction: 'player' },
-      { charId: 'zhou_cang', x: 2, y: 5, faction: 'player' },
-      { charId: 'cao_ren', x: 8, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
-      { charId: 'xu_huang', x: 10, y: 4, faction: 'enemy', aiType: 'aggressive' }
-    ]
-  },
-
-  // ==================== 종장: 중원 결전 & 천하 통일 ====================
-  {
-    id: 17,
-    code: 'yiling',
-    chapter: 5,
-    chapterTitle: '종장: 중원 결전 & 천하 통일',
-    name: '이릉 전투 (복수전)',
-    description: '의형제 관우와 장비의 복수를 위해 동오를 친 유비. 육손의 화공을 극복하고 오나라와 연합을 맺는다.',
+    chapterTitle: '제4장: 한중 쟁탈전과 익주 평정',
+    name: '양평관 전투',
+    description: '조조의 본대를 한중에서 완전히 몰아내고 유비가 만인의 추대를 받아 마침내 한중왕에 오른다.',
     width: 14,
     height: 10,
     mapData: generateMap([
       'MMMMMMMMMMMMMM',
-      'MMFFFFFFFFFFMM',
-      'MFFFFFFFFFFFFM',
-      '..FFFFFFFFFF..',
-      '..FFFFFFFFFF..',
-      '..FFFFFFFFFF..',
-      '..FFFFFFFFFF..',
-      'MFFFFFFFFFFFFM',
-      'MMFFFFFFFFFFMM',
-      'MMMMMMMMMMMMMM'
+      'MM..FF..W.GMMM',
+      'M..FFF...WW#MM',
+      '..FFFF....W#CM',
+      ',,...==...W#CM',
+      ',,.~~~~...W#CM',
+      ',..FFF....W#BM',
+      'M..FF...WWW#MM',
+      'MM...WWWWW.GMM',
+      'MMMMMMMMMMMMMM',
     ]),
     maxTurns: 35,
-    victoryCondition: '육손 격파',
+    victoryCondition: '조조 격퇴 및 양평관 점령',
     defeatCondition: '유비의 퇴각',
     playerDeploymentLimit: 8,
-    requiredPlayerCharIds: ['liu_bei'],
-    clearGold: 3500,
-    clearExpBonus: 250,
+    requiredPlayerCharIds: ["liu_bei","zhuge_liang"],
+    clearGold: 5000,
+    clearExpBonus: 320,
     initialDeployments: [
       { charId: 'liu_bei', x: 2, y: 4, faction: 'player', isCommander: true },
-      { charId: 'zhao_yun', x: 2, y: 3, faction: 'player' },
-      { charId: 'lu_xun', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
-      { charId: 'sun_quan', x: 12, y: 4, faction: 'enemy', aiType: 'hold' }
-    ]
+      { charId: 'zhuge_liang', x: 1, y: 4, faction: 'player' },
+      { charId: 'zhang_fei', x: 3, y: 3, faction: 'player' },
+      { charId: 'ma_chao', x: 3, y: 5, faction: 'player' },
+      { charId: 'zhao_yun', x: 4, y: 4, faction: 'player' },
+      { charId: 'cao_cao', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'sima_yi', x: 11, y: 3, faction: 'enemy', aiType: 'hold' },
+      { charId: 'xu_chu', x: 10, y: 4, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'ma_chao',
+        enemyCharId: 'xu_chu',
+        dialogueLines: [
+          { speaker: '마초', text: '조조의 호치(虎癡)여, 오늘이야말로 결판을 내자!' },
+          { speaker: '허저', text: '옷을 벗어 던지고 맨몸으로 덤벼주마!' },
+        ],
+        winner: 'player',
+        rewardExp: 160,
+        enemyRetreats: false
+      },
+    ],
+    treasures: [
+      { x: 12, y: 3, itemId: 'imperial_seal' },
+      { x: 12, y: 5, itemId: 'elixir' },
+    ],
+    preBattleDialogue: [
+      { speaker: '조조', text: '계륵(鷄肋)... 버리기엔 아깝고 취하기엔 뼈가 많구나.' },
+      { speaker: '유비', text: '조조! 한중의 산천은 결코 역적의 손에 넘어가지 않는다!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '제갈량', text: '주군, 여러 장수와 백성들의 뜻을 받들어 한중왕의 자리에 오르십시오!' },
+      { speaker: '유비', text: '오직 한실의 부흥과 천하의 평안을 위해 왕위에 오르겠소.' },
+    ],
   },
+  // 39. 번성 전투 (관우의 수계)
   {
-    id: 18,
+    id: 39,
+    code: 'fancheng',
+    chapter: 4,
+    chapterTitle: '제4장: 한중 쟁탈전과 익주 평정',
+    name: '번성 전투 (관우의 수계)',
+    description: '관우가 양양을 함락하고 한수를 터뜨려 우금의 7군 3만 병력을 수몰시키며 중원을 진동시킨다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '~~~~~~~~~~~~~~',
+      '~############~',
+      '~#CCCCCCCCCC#~',
+      '~#C...~~...C#~',
+      '~#C...~~...C#~',
+      '~#C...~~...C#~',
+      '~#CCCCCCCCCC#~',
+      '~######GG####~',
+      '~~~~~~~~~~~~~~',
+      '~~~~~~~~~~~~~~',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '조인 및 우금 격파',
+    defeatCondition: '관우의 퇴각',
+    playerDeploymentLimit: 7,
+    requiredPlayerCharIds: ["guan_yu"],
+    clearGold: 5000,
+    clearExpBonus: 300,
+    initialDeployments: [
+      { charId: 'guan_yu', x: 6, y: 8, faction: 'player', isCommander: true },
+      { charId: 'guan_ping', x: 5, y: 8, faction: 'player' },
+      { charId: 'zhou_cang', x: 7, y: 8, faction: 'player' },
+      { charId: 'liao_hua', x: 6, y: 9, faction: 'player' },
+      { charId: 'cao_ren', x: 6, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'yu_jin', x: 5, y: 4, faction: 'enemy', aiType: 'hold' },
+      { charId: 'man_chong', x: 7, y: 4, faction: 'enemy', aiType: 'hold' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhou_cang',
+        enemyCharId: 'yu_jin',
+        dialogueLines: [
+          { speaker: '주창', text: '물에 빠진 위나라 장수들아, 항복하라!' },
+          { speaker: '우금', text: '칠군이 수몰되다니... 관우의 신위(神威)에 무릎을 꿇을 뿐이다...' },
+        ],
+        winner: 'player',
+        rewardExp: 140,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 4, y: 3, itemId: 'good_medicine' },
+      { x: 8, y: 3, itemId: 'clear_wine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '관우', text: '폭우로 한수의 물이 불어났다. 둑을 터뜨려 조인의 번성을 수몰시켜라!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '조조', text: '관우의 기세가 천하를 흔드니 조조가 도읍을 허창에서 북으로 옮기려 하는구나!' },
+    ],
+  },
+  // 40. 맥성 구출전 (IF 분기)
+  {
+    id: 40,
+    code: 'maicheng',
+    chapter: 4,
+    chapterTitle: '제4장: 한중 쟁탈전과 형주 평정',
+    name: '맥성 구출전 (IF 분기)',
+    description: '여몽의 배신으로 형주가 함락되고 맥성에 고립된 관우를 구하기 위해 유비 본대가 급파된다!',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      'MMMMMMMMMMMMMM',
+      'M..TT....TT..M',
+      'M.####GG####.M',
+      '..#CCCCCCCC#..',
+      '..#C......C#..',
+      '..#C......C#..',
+      '..#CCCCCCCC#..',
+      'M.##########.M',
+      'M..TT....TT..M',
+      'MMMMMMMMMMMMMM',
+    ]),
+    maxTurns: 25,
+    victoryCondition: '관우를 서쪽 탈출로로 호위 또는 여몽/반장 격파',
+    defeatCondition: '관우의 전사 또는 유비의 퇴각',
+    playerDeploymentLimit: 8,
+    requiredPlayerCharIds: ["liu_bei","guan_yu"],
+    clearGold: 6000,
+    clearExpBonus: 350,
+    initialDeployments: [
+      { charId: 'guan_yu', x: 6, y: 5, faction: 'player', isCommander: true },
+      { charId: 'guan_ping', x: 5, y: 5, faction: 'player' },
+      { charId: 'zhou_cang', x: 7, y: 5, faction: 'player' },
+      { charId: 'liu_bei', x: 1, y: 4, faction: 'player' },
+      { charId: 'zhao_yun', x: 1, y: 3, faction: 'player' },
+      { charId: 'zhang_fei', x: 1, y: 5, faction: 'player' },
+      { charId: 'lu_meng', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'pan_zhang', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'gan_ning', x: 10, y: 5, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'guan_yu',
+        enemyCharId: 'pan_zhang',
+        dialogueLines: [
+          { speaker: '반장', text: '관우의 청룡도를 내 손에 넣겠다!' },
+          { speaker: '관우', text: '쥐새끼 같은 무리들이 어찌 무인의 도리를 알겠느냐!' },
+        ],
+        winner: 'player',
+        rewardExp: 160,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 3, y: 1, itemId: 'red_hare' },
+      { x: 10, y: 8, itemId: 'elixir' },
+    ],
+    preBattleDialogue: [
+      { speaker: '관우', text: '손권 놈이 맹약을 어기고 뒤통수를 치다니... 내 목숨은 다했는가!' },
+      { speaker: '유비', text: '운장 아우! 내가 왔다! 결코 그대를 잃을 수 없다!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '관우', text: '형님... 소우를 구하러 와주셨군요! 목숨을 바쳐 충성을 다하겠습니다!' },
+      { speaker: '유비', text: '하늘이 도왔소! 삼형제가 살아서 다시 뭉쳤으니 천하 통일의 대업을 이루세!' },
+    ],
+  },
+  // 41. 서릉 전투
+  {
+    id: 41,
+    code: 'xiling',
+    chapter: 4,
+    chapterTitle: '제4장: 한중 쟁탈전과 형주 평정',
+    name: '서릉 전투',
+    description: '손권의 오나라 정벌에 나선 촉한군이 서릉에서 동오의 명장 손환과 주연의 수비진을 격파한다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '..FF....FF....',
+      '..FF....FF....',
+      ',,...==...==,,',
+      ',,.~~~~...~~~~',
+      ',,.~~~~...~~~~',
+      ',,.~~~~...~~~~',
+      ',,...==...==,,',
+      '..FF....FF....',
+      '..FF....FF....',
+      'WWWWWWWWWWWWWW',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '적 전멸',
+    defeatCondition: '유비의 퇴각',
+    playerDeploymentLimit: 8,
+    requiredPlayerCharIds: ["liu_bei"],
+    clearGold: 5000,
+    clearExpBonus: 300,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'guan_xing', x: 3, y: 3, faction: 'player' },
+      { charId: 'zhang_bao', x: 3, y: 5, faction: 'player' },
+      { charId: 'huang_zhong', x: 2, y: 3, faction: 'player' },
+      { charId: 'ling_tong', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'gan_ning', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'guan_xing',
+        enemyCharId: 'ling_tong',
+        dialogueLines: [
+          { speaker: '관흥', text: '아버님의 원수를 갚고 촉한의 위용을 떨치겠다!' },
+          { speaker: '능통', text: '어린 장수이나 그 기세가 관운장과 똑같구나!' },
+        ],
+        winner: 'player',
+        rewardExp: 140,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 11, y: 2, itemId: 'good_medicine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '유비', text: '오나라가 동맹을 배신한 죗값을 반드시 치르게 하리라!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '장포', text: '서릉을 점령했으니 이제 이릉으로 진격할 차례입니다!' },
+    ],
+  },
+  // 42. 이릉 전투 (화계 극복)
+  {
+    id: 42,
+    code: 'yiling',
+    chapter: 4,
+    chapterTitle: '제4장: 한중 쟁탈전과 형주 평정',
+    name: '이릉 전투 (화계 극복)',
+    description: '육손의 칠백 리 화계를 예견하고 미리 대비하여 오나라 최후의 방어선을 뚫어낸다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      'MFFFFFFFFFFFFM',
+      'MFFFFFFFFFFFFM',
+      '..FFFF....FF..',
+      '..FFFF....FF..',
+      '..FF..VV..FF..',
+      '..FF..VV..FF..',
+      '..FFFF....FF..',
+      '..FFFF....FF..',
+      'MFFFFFFFFFFFFM',
+      'MFFFFFFFFFFFFM',
+    ]),
+    maxTurns: 35,
+    victoryCondition: '육손 격파 및 화해 성립',
+    defeatCondition: '유비의 퇴각',
+    playerDeploymentLimit: 8,
+    requiredPlayerCharIds: ["liu_bei","zhao_yun"],
+    clearGold: 5500,
+    clearExpBonus: 350,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'zhao_yun', x: 3, y: 4, faction: 'player' },
+      { charId: 'guan_xing', x: 3, y: 3, faction: 'player' },
+      { charId: 'zhang_bao', x: 3, y: 5, faction: 'player' },
+      { charId: 'lu_xun', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'sun_quan', x: 12, y: 4, faction: 'enemy', aiType: 'hold' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhao_yun',
+        enemyCharId: 'lu_xun',
+        dialogueLines: [
+          { speaker: '육손', text: '칠백 리 숲에 불을 질렀거늘 어찌 촉군이 흩어지지 않는가!' },
+          { speaker: '조운', text: '제갈 군사의 혜안으로 이미 화공의 위험을 알고 강가로 영채를 옮겼다!' },
+        ],
+        winner: 'player',
+        rewardExp: 160,
+        enemyRetreats: false
+      },
+    ],
+    treasures: [
+      { x: 11, y: 2, itemId: 'good_medicine' },
+      { x: 11, y: 6, itemId: 'clear_wine' },
+    ],
+    preBattleDialogue: [
+      { speaker: '육손', text: '유비의 군세가 길게 늘어섰으니 화공으로 태워버리겠다!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '손권', text: '우리가 서로 다툴 때가 아니오. 위의 조비를 치기 위해 다시 손을 잡읍시다.' },
+      { speaker: '유비', text: '대의를 위해 과거를 묻지 않고 오와 연합하겠소.' },
+    ],
+  },
+  // 43. 남만 전투 (칠종칠금)
+  {
+    id: 43,
+    code: 'nanman',
+    chapter: 5,
+    chapterTitle: '종장: 중원 결전 & 천하 통일',
+    name: '남만 전투 (칠종칠금)',
+    description: '북벌 전 후방을 안정시키기 위해 노수를 건너 맹획의 등갑군을 화계로 평정하고 진심 어린 심복을 얻는다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      'SSSS..SSSS..SSSS',
+      'SSSS..SSSS..SSSS',
+      '..SS....SS....SS',
+      '..SS....SS....SS',
+      '....FF....FF....',
+      '....FF....FF....',
+      '..SS....SS....SS',
+      '..SS....SS....SS',
+      'SSSS..SSSS..SSSS',
+      'SSSS..SSSS..SSSS',
+    ]),
+    maxTurns: 35,
+    victoryCondition: '맹획 칠종칠금 (맹획 격파)',
+    defeatCondition: '제갈량의 퇴각',
+    playerDeploymentLimit: 8,
+    requiredPlayerCharIds: ["zhuge_liang","zhao_yun","wei_yan"],
+    clearGold: 6000,
+    clearExpBonus: 350,
+    initialDeployments: [
+      { charId: 'zhuge_liang', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'zhao_yun', x: 3, y: 3, faction: 'player' },
+      { charId: 'wei_yan', x: 3, y: 5, faction: 'player' },
+      { charId: 'ma_chao', x: 4, y: 4, faction: 'player' },
+      { charId: 'meng_huo', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'aggressive' },
+      { charId: 'zhu_rong', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'wu_tugu', x: 10, y: 5, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'zhao_yun',
+        enemyCharId: 'zhu_rong',
+        dialogueLines: [
+          { speaker: '축융', text: '남만의 비도 맛을 보아라!' },
+          { speaker: '조운', text: '창끝으로 비도를 모두 쳐내겠다!' },
+        ],
+        winner: 'player',
+        rewardExp: 150,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 6, y: 4, itemId: 'good_medicine' },
+      { x: 8, y: 5, itemId: 'meat' },
+    ],
+    preBattleDialogue: [
+      { speaker: '제갈량', text: '남만의 마음을 얻지 못하면 북벌에 나설 수 없소. 공심(攻心)으로 굴복시키겠소.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '맹획', text: '승상께서는 진정한 하늘의 사람이십니다! 남만은 영원히 반역하지 않겠습니다!' },
+    ],
+  },
+  // 44. 진창 전투
+  {
+    id: 44,
+    code: 'jinchang',
+    chapter: 5,
+    chapterTitle: '종장: 중원 결전 & 천하 통일',
+    name: '진창 전투',
+    description: '학소가 버티는 난공불락의 진창성을 우회하여 기습하고 관중의 관문을 마침내 돌파한다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      '##############',
+      '#CCCCCCCCCCCC#',
+      '#C....TT....C#',
+      '#C.BB....BB.C#',
+      '#C..........C#',
+      '#C..........C#',
+      '#C.BB....BB.C#',
+      '#C....TT....C#',
+      '#CCCCCCCCCCCC#',
+      '######GG######',
+    ]),
+    maxTurns: 30,
+    victoryCondition: '성벽 돌파 및 적 전멸',
+    defeatCondition: '유비 또는 제갈량의 퇴각',
+    playerDeploymentLimit: 8,
+    requiredPlayerCharIds: ["liu_bei","zhuge_liang"],
+    clearGold: 6500,
+    clearExpBonus: 380,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 6, y: 8, faction: 'player', isCommander: true },
+      { charId: 'zhuge_liang', x: 5, y: 8, faction: 'player' },
+      { charId: 'wei_yan', x: 7, y: 8, faction: 'player' },
+      { charId: 'jiang_wei', x: 4, y: 8, faction: 'player' },
+      { charId: 'cao_ren', x: 6, y: 3, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'man_chong', x: 5, y: 4, faction: 'enemy', aiType: 'hold' },
+    ],
+    duels: [
+      {
+        playerCharId: 'jiang_wei',
+        enemyCharId: 'man_chong',
+        dialogueLines: [
+          { speaker: '강유', text: '승상의 지략대로 이미 성문 뒤를 점령했다!' },
+          { speaker: '만총', text: '강백약의 지모가 이토록 뛰어날 줄이야!' },
+        ],
+        winner: 'player',
+        rewardExp: 150,
+        enemyRetreats: true
+      },
+    ],
+    treasures: [
+      { x: 4, y: 2, itemId: 'manual_bow' },
+    ],
+    preBattleDialogue: [
+      { speaker: '제갈량', text: '진창을 넘어야 장안과 낙양으로 향하는 대로가 열립니다.' },
+    ],
+    postBattleDialogue: [
+      { speaker: '유비', text: '관중의 관문이 열렸다! 이제 조조의 심장부로 진격한다!' },
+    ],
+  },
+  // 45. 기산 전투
+  {
+    id: 45,
+    code: 'qishan',
+    chapter: 5,
+    chapterTitle: '종장: 중원 결전 & 천하 통일',
+    name: '기산 전투',
+    description: '제갈량과 사마의가 기산의 들판에서 군략과 진법의 극한을 겨루며 천하의 운명을 건 한판 승부를 벌인다.',
+    width: 14,
+    height: 10,
+    mapData: generateMap([
+      'MMMM......MMMM',
+      'MM..FF..FF..MM',
+      '..FFFF..FFFF..',
+      '..FF......FF..',
+      '....==..==....',
+      '....==..==....',
+      '..FF......FF..',
+      '..FFFF..FFFF..',
+      'MM..FF..FF..MM',
+      'MMMM......MMMM',
+    ]),
+    maxTurns: 35,
+    victoryCondition: '사마의 격파',
+    defeatCondition: '제갈량 또는 유비의 퇴각',
+    playerDeploymentLimit: 9,
+    requiredPlayerCharIds: ["liu_bei","zhuge_liang"],
+    clearGold: 7000,
+    clearExpBonus: 400,
+    initialDeployments: [
+      { charId: 'liu_bei', x: 2, y: 4, faction: 'player', isCommander: true },
+      { charId: 'zhuge_liang', x: 2, y: 5, faction: 'player' },
+      { charId: 'zhao_yun', x: 3, y: 3, faction: 'player' },
+      { charId: 'wei_yan', x: 3, y: 6, faction: 'player' },
+      { charId: 'jiang_wei', x: 4, y: 4, faction: 'player' },
+      { charId: 'sima_yi', x: 11, y: 4, faction: 'enemy', isCommander: true, aiType: 'hold' },
+      { charId: 'zhang_he', x: 10, y: 3, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'deng_ai', x: 10, y: 5, faction: 'enemy', aiType: 'aggressive' },
+    ],
+    duels: [
+      {
+        playerCharId: 'jiang_wei',
+        enemyCharId: 'deng_ai',
+        dialogueLines: [
+          { speaker: '강유', text: '등사재! 천하의 주인이 누구인지 오늘 가리자!' },
+          { speaker: '등애', text: '강백약! 그대의 기산 북벌도 여기서 끝이다!' },
+        ],
+        winner: 'player',
+        rewardExp: 160,
+        enemyRetreats: false
+      },
+    ],
+    treasures: [
+      { x: 6, y: 4, itemId: 'art_of_war' },
+    ],
+    preBattleDialogue: [
+      { speaker: '사마의', text: '공명, 그대의 재주는 하늘을 찌르나 수명이 그대를 기다려주지 않을 것이오!' },
+      { speaker: '제갈량', text: '중달, 한실의 대의는 하늘의 뜻이니 사사로운 목숨에 연연하지 않소!' },
+    ],
+    postBattleDialogue: [
+      { speaker: '사마의', text: '과연 와룡의 진법은 귀신도 곡할 지경이로다! 업성으로 퇴각하라!' },
+    ],
+  },
+  // 46. 업성 최종결전 (천하 통일)
+  {
+    id: 46,
     code: 'ye_castle_final',
     chapter: 5,
     chapterTitle: '종장: 중원 결전 & 천하 통일',
     name: '업성 최종결전 (천하 통일)',
-    description: '촉과 오의 연합군이 조조의 마지막 거점 업성으로 총진격한다. 400년 한나라의 부흥을 건 건곤일척의 최후 승부!',
+    description: '촉과 오의 전 연합군이 조조의 마지막 거점 업성으로 총진격한다. 400년 한나라의 부흥을 건 건곤일척의 최후 승부!',
     width: 14,
     height: 10,
     mapData: generateMap([
@@ -880,13 +2826,13 @@ export const STAGES: StageDef[] = [
       '#C..TT..TT..C#',
       '#CBB......BBC#',
       '#CCCCCCCCCCCC#',
-      '######GG######'
+      '######GG######',
     ]),
-    maxTurns: 40,
+    maxTurns: 45,
     victoryCondition: '조조 격파 및 한실 부흥',
     defeatCondition: '유비의 퇴각',
     playerDeploymentLimit: 10,
-    requiredPlayerCharIds: ['liu_bei', 'guan_yu', 'zhang_fei', 'zhuge_liang', 'zhao_yun'],
+    requiredPlayerCharIds: ["liu_bei","guan_yu","zhang_fei","zhuge_liang","zhao_yun"],
     clearGold: 10000,
     clearExpBonus: 500,
     initialDeployments: [
@@ -898,14 +2844,16 @@ export const STAGES: StageDef[] = [
       { charId: 'huang_zhong', x: 8, y: 8, faction: 'player' },
       { charId: 'ma_chao', x: 3, y: 8, faction: 'player' },
       { charId: 'wei_yan', x: 9, y: 8, faction: 'player' },
-
-      // 조조 최후의 수비군
+      { charId: 'jiang_wei', x: 5, y: 9, faction: 'player' },
+      { charId: 'fa_zheng', x: 7, y: 9, faction: 'player' },
       { charId: 'cao_cao', x: 6, y: 2, faction: 'enemy', isCommander: true, aiType: 'hold' },
       { charId: 'sima_yi', x: 7, y: 2, faction: 'enemy', aiType: 'hold' },
       { charId: 'xiahou_dun', x: 5, y: 3, faction: 'enemy', aiType: 'aggressive' },
       { charId: 'zhang_liao', x: 7, y: 3, faction: 'enemy', aiType: 'aggressive' },
       { charId: 'xu_chu', x: 4, y: 4, faction: 'enemy', aiType: 'aggressive' },
-      { charId: 'xu_huang', x: 8, y: 4, faction: 'enemy', aiType: 'aggressive' }
+      { charId: 'xu_huang', x: 8, y: 4, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'cao_ren', x: 3, y: 3, faction: 'enemy', aiType: 'aggressive' },
+      { charId: 'cao_pi', x: 9, y: 3, faction: 'enemy', aiType: 'hold' },
     ],
     duels: [
       {
@@ -913,24 +2861,35 @@ export const STAGES: StageDef[] = [
         enemyCharId: 'zhang_liao',
         dialogueLines: [
           { speaker: '관우', text: '문원, 오늘 이 자리에서 우리의 오랜 인연도 끝이 나겠구려.' },
-          { speaker: '장료', text: '운장 형님! 후회 없이 무인으로서 검을 맞대겠소!' }
+          { speaker: '장료', text: '운장 형님! 후회 없이 무인으로서 검을 맞대겠소!' },
         ],
         winner: 'player',
         rewardExp: 150,
         enemyRetreats: true
-      }
+      },
+      {
+        playerCharId: 'zhang_fei',
+        enemyCharId: 'xu_chu',
+        dialogueLines: [
+          { speaker: '장비', text: '호치 허저! 오늘이야말로 천하제일의 맹장을 가리자!' },
+          { speaker: '허저', text: '승상을 위해 목숨을 바치겠다!' },
+        ],
+        winner: 'player',
+        rewardExp: 150,
+        enemyRetreats: true
+      },
     ],
     treasures: [
       { x: 4, y: 3, itemId: 'imperial_seal' },
-      { x: 8, y: 3, itemId: 'elixir' }
+      { x: 8, y: 3, itemId: 'elixir' },
     ],
     preBattleDialogue: [
       { speaker: '유비', text: '조조! 마침내 그대의 패도도 오늘로 끝이 났소!' },
-      { speaker: '조조', text: '유현덕... 천하의 영웅은 오직 나와 그대뿐이라 했거늘, 최후의 승부를 겨뤄보자!' }
+      { speaker: '조조', text: '유현덕... 천하의 영웅은 오직 나와 그대뿐이라 했거늘, 최후의 승부를 겨뤄보자!' },
     ],
     postBattleDialogue: [
       { speaker: '조조', text: '크윽... 현덕... 하늘이 그대를 택했단 말인가...' },
-      { speaker: '유비', text: '천하의 백성들이 마침내 평화를 되찾게 되었소. 의형제들이여, 한실의 부흥을 알리자!' }
-    ]
+      { speaker: '유비', text: '천하의 백성들이 마침내 평화를 되찾게 되었소. 의형제들이여, 한실의 부흥을 만천하에 알리자!' },
+    ],
   }
 ];

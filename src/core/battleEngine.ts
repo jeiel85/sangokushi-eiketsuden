@@ -8,6 +8,8 @@ import type { BattleUnit, StageDef, TerrainType } from '../types/game';
 export interface CombatResult {
   damage: number;
   isCritical: boolean;
+  isBackAttack?: boolean;
+  isFlankAttack?: boolean;
   isKilled: boolean;
   expGained: number;
   isLevelUp: boolean;
@@ -155,7 +157,7 @@ export class BattleEngine {
     return targets;
   }
 
-  // 4. 일반 물리 공격 데미지 및 반격 처리 공식 (영걸전 정통 공식)
+  // 4. 일반 물리 공격 데미지 및 반격 처리 공식 (방향성 배후/측면 공격 반영)
   public static executeAttack(
     attacker: BattleUnit,
     defender: BattleUnit,
@@ -173,7 +175,34 @@ export class BattleEngine {
     // 병종 상성 (보병 > 기병 > 궁병 > 보병)
     const classMod = this.getClassAdvantageModifier(attacker.classType, defender.classType);
 
-    // 기본 공식: (Atk * 3 - Def * 2) * 상성 / 지형
+    // 방향 보정 (배후 공격 +20%, 측면 공격 +10%)
+    let directionMod = 1.0;
+    let isBackAttack = false;
+    let isFlankAttack = false;
+
+    const defFacing = defender.facing || 'down';
+    const dx = attacker.x - defender.x;
+    const dy = attacker.y - defender.y;
+
+    if (
+      (defFacing === 'right' && dx < 0) ||
+      (defFacing === 'left' && dx > 0) ||
+      (defFacing === 'down' && dy < 0) ||
+      (defFacing === 'up' && dy > 0)
+    ) {
+      directionMod = 1.2;
+      isBackAttack = true;
+    } else if (
+      (defFacing === 'right' && dx === 0) ||
+      (defFacing === 'left' && dx === 0) ||
+      (defFacing === 'down' && dy === 0) ||
+      (defFacing === 'up' && dy === 0)
+    ) {
+      directionMod = 1.1;
+      isFlankAttack = true;
+    }
+
+    // 기본 공식: (Atk * 3 - Def * 2) * 상성 * 방향보정 / 지형
     let baseDamage = (totalAtk * 3 - totalDef * 2);
     if (baseDamage < 10) baseDamage = Math.max(5, Math.round(totalAtk * 0.4));
 
@@ -185,7 +214,10 @@ export class BattleEngine {
     // 랜덤 난수 (0.9 ~ 1.1)
     const variance = 0.9 + Math.random() * 0.2;
 
-    const finalDamage = Math.max(1, Math.round((baseDamage * classMod * critMultiplier * variance) / tDefMod));
+    const finalDamage = Math.max(
+      1,
+      Math.round((baseDamage * classMod * directionMod * critMultiplier * variance) / tDefMod)
+    );
 
     // 수비자 HP 차감
     const newDefenderHp = Math.max(0, defender.curHp - finalDamage);
@@ -227,6 +259,8 @@ export class BattleEngine {
     return {
       damage: finalDamage,
       isCritical,
+      isBackAttack,
+      isFlankAttack,
       isKilled,
       expGained,
       isLevelUp,
@@ -235,16 +269,28 @@ export class BattleEngine {
     };
   }
 
-  // 5. 책략 발동 계산
+  // 5. 책략 발동 계산 (날씨 시스템 연동)
   public static executeTactic(
     caster: BattleUnit,
     target: BattleUnit,
     tacticId: string,
-    targetTerrain: TerrainType
+    targetTerrain: TerrainType,
+    weather: 'sunny' | 'rainy' | 'cloudy' = 'sunny'
   ): { value: number; message: string; expGained: number; isLevelUp: boolean; isKilled: boolean } {
     const tactic = TACTICS[tacticId];
     if (!tactic || caster.curMp < tactic.mpCost) {
       return { value: 0, message: '책략치 부족', expGained: 0, isLevelUp: false, isKilled: false };
+    }
+
+    // 비(우천)일 때 화계 불가
+    if (weather === 'rainy' && tactic.category === 'fire') {
+      return {
+        value: 0,
+        message: '우천으로 화계 불가!',
+        expGained: 0,
+        isLevelUp: false,
+        isKilled: false
+      };
     }
 
     caster.curMp -= tactic.mpCost;
@@ -308,11 +354,16 @@ export class BattleEngine {
       const intelDiff = caster.intel * 2.2 - target.intel * 1.2;
       let tacticDamage = Math.round(tactic.power + intelDiff * 0.8);
 
-      // 지형 보너스
+      // 지형 및 날씨 보너스
       if (tactic.category === 'fire' && targetTerrain === 'forest') {
         tacticDamage = Math.round(tacticDamage * 1.3); // 숲에서 화계 30% 증폭!
-      } else if (tactic.category === 'water' && (targetTerrain === 'river' || targetTerrain === 'swamp')) {
-        tacticDamage = Math.round(tacticDamage * 1.3); // 강/습지에서 수계 30% 증폭!
+      } else if (tactic.category === 'water') {
+        if (targetTerrain === 'river' || targetTerrain === 'swamp') {
+          tacticDamage = Math.round(tacticDamage * 1.3); // 강/습지에서 수계 30% 증폭!
+        }
+        if (weather === 'rainy') {
+          tacticDamage = Math.round(tacticDamage * 1.25); // 호우로 인한 수계 25% 추가 증폭!
+        }
       }
 
       tacticDamage = Math.max(15, Math.round(tacticDamage * (0.9 + Math.random() * 0.2)));

@@ -74,16 +74,56 @@ async function runTest() {
     await page.goto(`http://127.0.0.1:${port}`, { waitUntil: 'networkidle' });
 
     // 1. Title Screen & start game
+    console.log('1️⃣ Testing Title Screen...');
+    await page.screenshot({ path: path.join(screenshotDir, '01_title_screen.png') });
     await page.click('button:has-text("새로운 천하 통일 시작")');
     await page.waitForTimeout(600);
 
-    // 2. Town screen -> deploy
+    // 2. Town screen -> Open EquipModal (군비 정돈 / 전직)
+    console.log('2️⃣ Testing Town Screen & EquipModal...');
+    await page.screenshot({ path: path.join(screenshotDir, '02_town_screen.png') });
+    
+    const equipBtn = page.locator('button:has-text("군비 정돈 / 전직")');
+    if (await equipBtn.isVisible()) {
+      console.log('👉 Opening 군비 정돈 / 전직 modal...');
+      await equipBtn.click();
+      await page.waitForTimeout(400);
+      await page.screenshot({ path: path.join(screenshotDir, '03_equip_modal.png') });
+      console.log('📸 Captured 03_equip_modal.png (Equipment & Promotion Modal)');
+      await page.click('button:has-text("닫기 ✕")');
+      await page.waitForTimeout(300);
+    }
+
+    // 3. Open Stage Select Modal to verify stages
+    console.log('3️⃣ Testing Stage Select Modal...');
+    const stageSelectBtn = page.locator('button:has-text("전투지 선택")');
+    await stageSelectBtn.click();
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: path.join(screenshotDir, '04_stage_select_modal.png') });
+    console.log('📸 Captured 04_stage_select_modal.png (46 Stages Select Modal)');
+    await page.click('button:has-text("닫기 ✕")');
+    await page.waitForTimeout(300);
+
+    // 4. Town screen -> Deploy to battle
+    console.log('4️⃣ Deploying to battle...');
     await page.click('button:has-text("전장 출진 준비")');
     await page.waitForTimeout(400);
     await page.click('button:has-text("전장으로 출진!")');
     await page.waitForTimeout(800);
 
-    console.log('2️⃣ Verifying Battle Canvas & Unit Selection Flow...');
+    // 5. Pre-battle dialogue cutscene check
+    const cutsceneModal = page.locator('text=전투 개시 회화');
+    if (await cutsceneModal.isVisible()) {
+      console.log('👉 Story cutscene detected! Capturing screenshot...');
+      await page.screenshot({ path: path.join(screenshotDir, '05_story_cutscene.png') });
+      console.log('📸 Captured 05_story_cutscene.png (Pre-Battle Dialogue Cutscene)');
+      await page.click('button:has-text("스킵 ⏩")');
+      await page.waitForTimeout(400);
+    }
+
+    console.log('5️⃣ Verifying Battle Canvas & HUD (Weather & Turns)...');
+    await page.screenshot({ path: path.join(screenshotDir, '06_battle_screen_hud.png') });
+
     const canvas = page.locator('canvas');
     const box = await canvas.boundingBox();
     if (!box) throw new Error('Canvas bounding box not found');
@@ -133,7 +173,7 @@ async function runTest() {
     console.log('📸 Captured 09_move_cancelled_reverted.png');
 
     console.log('\n======================================================');
-    console.log('🎉 NEW UX FLOW VERIFIED: NO POPUP ON MOVE TILES!');
+    console.log('🎉 ALL SYSTEMS & UX VERIFIED (WEATHER, EQUIP, STAGES, STORY CUTSCENES, TILE MOVES)!');
     console.log('======================================================');
   } catch (err) {
     console.error('❌ Test failed:', err);

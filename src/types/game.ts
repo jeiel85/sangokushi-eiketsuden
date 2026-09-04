@@ -144,6 +144,7 @@ export interface BattleUnit {
   equippedItems: string[];
   tactics: string[];
   isCommander?: boolean;
+  facing?: 'up' | 'down' | 'left' | 'right';
 }
 
 export interface DuelDef {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { BattleScreen } from './components/BattleScreen';
 import { DeploymentModal } from './components/DeploymentModal';
+import { EquipModal } from './components/EquipModal';
 import { ShopModal } from './components/ShopModal';
 import { StageSelectModal } from './components/StageSelectModal';
 import { TitleScreen } from './components/TitleScreen';
@@ -170,6 +171,7 @@ export function App() {
 
   // 모달 상태들
   const [isShopOpen, setIsShopOpen] = useState(false);
+  const [isEquipOpen, setIsEquipOpen] = useState(false);
   const [isDeploymentOpen, setIsDeploymentOpen] = useState(false);
   const [isStageSelectOpen, setIsStageSelectOpen] = useState(false);
   const [inspectUnit, setInspectUnit] = useState<BattleUnit | null>(null);
@@ -369,6 +371,20 @@ export function App() {
     });
   };
 
+  // 보물창고 및 전장 보물 획득
+  const handleLootTreasure = (itemId: string, gold?: number) => {
+    setGameState((prev) => {
+      const next = { ...prev };
+      if (itemId) {
+        next.inventory = [...next.inventory, itemId];
+      }
+      if (gold) {
+        next.gold = prev.gold + gold;
+      }
+      return next;
+    });
+  };
+
   return (
     <div className="h-screen w-screen bg-black font-sans text-slate-100 flex flex-col items-center justify-center">
       {/* 1. 타이틀 화면 */}
@@ -389,6 +405,7 @@ export function App() {
           gameState={gameState}
           currentStage={currentStage}
           onOpenShop={() => setIsShopOpen(true)}
+          onOpenEquip={() => setIsEquipOpen(true)}
           onOpenDeployment={() => setIsDeploymentOpen(true)}
           onOpenUnitDetail={(unit) => setInspectUnit(unit)}
           onOpenStageSelect={() => setIsStageSelectOpen(true)}
@@ -401,6 +418,7 @@ export function App() {
         <BattleScreen
           stage={currentStage}
           playerUnits={generatePlayerBattleUnits()}
+          onLootTreasure={handleLootTreasure}
           onVictory={handleBattleVictory}
           onDefeat={handleBattleDefeat}
           onRetreat={() => {
@@ -418,6 +436,15 @@ export function App() {
           onBuy={handleBuyItem}
           onSell={handleSellItem}
           onClose={() => setIsShopOpen(false)}
+        />
+      )}
+
+      {/* 군비 정돈 및 전직 모달 */}
+      {isEquipOpen && (
+        <EquipModal
+          gameState={gameState}
+          onUpdateGameState={setGameState}
+          onClose={() => setIsEquipOpen(false)}
         />
       )}
 

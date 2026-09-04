@@ -9,6 +9,7 @@ interface TownScreenProps {
   gameState: GameState;
   currentStage: StageDef;
   onOpenShop: () => void;
+  onOpenEquip: () => void;
   onOpenDeployment: () => void;
   onOpenUnitDetail: (unit: BattleUnit) => void;
   onOpenStageSelect: () => void;
@@ -19,6 +20,7 @@ export const TownScreen: React.FC<TownScreenProps> = ({
   gameState,
   currentStage,
   onOpenShop,
+  onOpenEquip,
   onOpenDeployment,
   onOpenUnitDetail,
   onOpenStageSelect,
@@ -136,6 +138,16 @@ export const TownScreen: React.FC<TownScreenProps> = ({
           className="rounded border border-amber-600 bg-amber-950/50 px-5 py-2.5 text-sm font-bold text-amber-300 hover:bg-amber-900/60 active:scale-95 transition"
         >
           도구 상점 🛒
+        </button>
+
+        <button
+          onClick={() => {
+            soundManager.playMenuClick();
+            onOpenEquip();
+          }}
+          className="rounded border border-emerald-600 bg-emerald-950/50 px-5 py-2.5 text-sm font-bold text-emerald-300 hover:bg-emerald-900/60 active:scale-95 transition"
+        >
+          군비 정돈 / 전직 ⚔️
         </button>
 
         <button
