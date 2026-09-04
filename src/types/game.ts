@@ -145,6 +145,7 @@ export interface BattleUnit {
   tactics: string[];
   isCommander?: boolean;
   facing?: 'up' | 'down' | 'left' | 'right';
+  morale: number;        // 사기(士氣, 0~100)
 }
 
 export interface DuelDef {
@@ -195,6 +196,17 @@ export interface StageDef {
   clearExpBonus: number;
   preBattleDialogue?: { speaker: string; text: string }[];
   postBattleDialogue?: { speaker: string; text: string }[];
+  escapePoint?: { x: number; y: number }; // 탈출 승리 조건 지점 (예: 유비 탈출)
+}
+
+export interface BattleSaveData {
+  stageId: number;
+  currentTurn: number;
+  phase: 'player' | 'enemy';
+  weather: 'sunny' | 'rainy' | 'cloudy';
+  units: BattleUnit[];
+  claimedTreasures: string[];
+  timestamp: number;
 }
 
 export interface GameState {
@@ -214,8 +226,10 @@ export interface GameState {
     lead: number;
     equippedItems: string[];
     tactics: string[];
+    morale?: number;
   }[];
   inventory: string[]; // 보관 중인 아이템들
   isCheatedLevel99: boolean;
   clearedStages: number[];
+  battleSave?: BattleSaveData | null;
 }

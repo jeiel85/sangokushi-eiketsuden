@@ -28,15 +28,47 @@ export const TownScreen: React.FC<TownScreenProps> = ({
 }) => {
   const [selectedDialogueHero, setSelectedDialogueHero] = useState<string>('liu_bei');
 
-  const heroDialogues: Record<string, string> = {
-    liu_bei: `백성들을 도탄에서 구하고 한실을 부흥시키는 것이 우리 의형제의 평생의 대의요. 다음 전투인 [${currentStage.name}]에서도 부디 신중을 기해주시오.`,
-    guan_yu: `형님의 뜻이 향하는 곳이라면 소장의 청룡언월도가 언제든 앞장설 것입니다. 군비를 단단히 점검하십시오.`,
-    zhang_fei: `으하하! 몸이 근질근질하던 참이었는데 잘 됐군! 이번에도 내 장팔사모 맛을 적들에게 톡톡히 보여주겠소!`,
-    zhuge_liang: `주군, [${currentStage.name}]에서는 지형의 험준함과 적의 책략을 경계하셔야 합니다. 화계와 수계의 쓰임새를 미리 살펴보시길 권합니다.`,
-    zhao_yun: `상산 조자룡, 주군의 안위를 지키기 위해 만반의 준비를 마쳤습니다! 명을 내려주십시오.`
+  const getHeroDialogue = (charId: string): string => {
+    const stageId = currentStage.id;
+    const stageName = currentStage.name;
+
+    if (charId === 'guan_yu') {
+      if (stageId <= 2) return `화웅 따위의 목은 술이 식기 전에 단칼에 베어 바치겠습니다. 형님께서는 염려 마십시오.`;
+      if (stageId <= 12) return `여포의 용맹이 뛰어나다 하나 백성을 등진 자는 천하를 얻을 수 없습니다. [${stageName}]에서 결판을 내겠습니다.`;
+      if (stageId <= 15) return `백마와 연진에서 안량과 문추를 베어 조조에게 빚을 갚았으니, 이제 오관참육장을 돌파해 형님을 뵈러 갑니다!`;
+      if (stageId <= 30) return `장사 전투에서 만난 노장 황충은 참으로 충직한 장수요. 함께 힘을 합쳐 형주를 굳건히 지키겠습니다.`;
+      if (stageId <= 40) return `번성에서 수계를 펼쳐 우금의 칠군을 수몰시켰습니다! 청룡언월도가 한실의 대의를 밝힐 것입니다.`;
+      return `형님과 도원결의를 맺은 날이 엊그제 같소. 천하 통일과 한실 부흥의 그날까지 소장의 무예를 다 바치겠습니다.`;
+    }
+
+    if (charId === 'zhang_fei') {
+      if (stageId <= 2) return `으하하! 호로관의 여포 녀석, 제아무리 날고 기어도 내 장팔사모 맛을 보면 간담이 서늘할 거요!`;
+      if (stageId <= 12) return `간신 배 놈들을 모두 쓸어버리지 않고는 배길 수가 없소! [${stageName}]의 적들을 모조리 쓸어버립시다!`;
+      if (stageId <= 23) return `당양교 위에 나 장익덕이 홀로 버티고 서 있다! 목숨이 아까운 조조 놈들은 덤벼라!`;
+      if (stageId <= 35) return `가맹관에서 금마초와 밤낮을 횃불 밝혀 싸웠소! 이제 와구관의 장합 놈도 단숨에 쳐부수겠소!`;
+      return `형님! 이제 마지막 결전 [${stageName}]만 남았소! 삼형제가 천하를 호령할 때가 드디어 왔소!`;
+    }
+
+    if (charId === 'zhao_yun') {
+      if (stageId <= 10) return `공손찬 장군 휘하에 있었으나, 유현덕 공의 인덕을 흠모하여 왔습니다. 평생을 주군을 위해 바치겠습니다.`;
+      if (stageId <= 23) return `장판파의 조조군 백만 대군 속이라도, 주군의 혈육인 아두님을 품에 안고 반드시 살아서 돌아오겠습니다!`;
+      if (stageId <= 38) return `한수 전투에서 온몸이 담력(一身都是膽)이라는 찬사를 들었습니다. 상산 조자룡, 선봉에 서겠습니다!`;
+      return `주군! 어떠한 험지라도 백마와 은창으로 길을 열겠습니다. [${stageName}]의 승리는 우리의 것입니다!`;
+    }
+
+    if (charId === 'zhuge_liang') {
+      if (stageId <= 20) return `삼고초려의 은혜에 보답하고자 융중의 대책을 펼칩니다. 박망파와 신야에서 화공으로 조조군을 격파할 것입니다.`;
+      if (stageId <= 25) return `동남풍이 불어오면 적벽의 조조 수군은 하룻밤 사이에 불바다가 될 것입니다. 천시와 지리는 우리에게 있습니다.`;
+      if (stageId <= 34) return `서천의 험준한 산세를 넘어 익주를 평정하고 한중을 취해야 삼분천하의 계책이 완성됩니다.`;
+      if (stageId <= 43) return `남만왕 맹획을 칠종칠금하여 남방의 우환을 없앴으니, 이제 북벌을 단행하여 중원을 수복할 때입니다.`;
+      return `주군, [${stageName}]의 마지막 관문만 넘으면 400년 한실의 사직이 다시 우뚝 설 것입니다. 만전을 기해주소서.`;
+    }
+
+    // liu_bei
+    return `백성들을 도탄에서 구하고 한실을 부흥시키는 것이 우리 의형제의 평생의 대의요. [${stageName}]에서도 전 장수들이 합심하여 승리를 쟁취합시다.`;
   };
 
-  const activeDialogue = heroDialogues[selectedDialogueHero] || heroDialogues.liu_bei;
+  const activeDialogue = getHeroDialogue(selectedDialogueHero);
 
   return (
     <div className="relative flex h-screen w-full flex-col justify-between overflow-hidden bg-slate-950 p-4 select-none">
@@ -177,7 +209,8 @@ export const TownScreen: React.FC<TownScreenProps> = ({
                 hasActed: false,
                 status: 'normal',
                 equippedItems: firstUnit.equippedItems,
-                tactics: firstUnit.tactics
+                tactics: firstUnit.tactics,
+                morale: firstUnit.morale ?? 100
               });
             }
           }}

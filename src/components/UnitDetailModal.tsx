@@ -127,6 +127,10 @@ export const UnitDetailModal: React.FC<UnitDetailModalProps> = ({ unit, onClose,
                   <span className="font-bold text-teal-400">{unit.defense}</span>
                 </div>
                 <div>
+                  <span className="text-xs text-slate-400">사기(士氣): </span>
+                  <span className="font-bold text-yellow-400">{unit.morale ?? 100} / 100</span>
+                </div>
+                <div>
                   <span className="text-xs text-slate-400">상태: </span>
                   <span className="font-bold text-slate-200">
                     {unit.status === 'confused' ? '💫 혼란' : unit.status === 'poisoned' ? '☠️ 독' : '정상'}

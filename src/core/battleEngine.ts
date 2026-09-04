@@ -202,12 +202,18 @@ export class BattleEngine {
       isFlankAttack = true;
     }
 
-    // 기본 공식: (Atk * 3 - Def * 2) * 상성 * 방향보정 / 지형
+    // 사기(士氣) 보정치
+    const atkMorale = attacker.morale ?? 100;
+    const defMorale = defender.morale ?? 100;
+    const atkMoraleMod = atkMorale >= 80 ? 1.05 : atkMorale <= 30 ? 0.8 : 1.0;
+    const defMoraleMod = defMorale <= 30 ? 0.8 : 1.0;
+
+    // 기본 공식: (Atk * 3 - Def * 2) * 상성 * 방향보정 * 사기보정 / 지형
     let baseDamage = (totalAtk * 3 - totalDef * 2);
     if (baseDamage < 10) baseDamage = Math.max(5, Math.round(totalAtk * 0.4));
 
-    // 크리티컬 확률 (무력 차이 반영)
-    const critChance = Math.max(0.05, (attacker.war - defender.war) * 0.005 + 0.08);
+    // 크리티컬 확률 (무력 차이 + 사기 고양 반영)
+    const critChance = Math.max(0.05, (attacker.war - defender.war) * 0.005 + 0.08 + (atkMorale >= 80 ? 0.08 : 0));
     const isCritical = Math.random() < critChance;
     const critMultiplier = isCritical ? 1.5 : 1.0;
 
@@ -216,13 +222,20 @@ export class BattleEngine {
 
     const finalDamage = Math.max(
       1,
-      Math.round((baseDamage * classMod * directionMod * critMultiplier * variance) / tDefMod)
+      Math.round((baseDamage * classMod * directionMod * atkMoraleMod * critMultiplier * variance) / (tDefMod * defMoraleMod))
     );
 
     // 수비자 HP 차감
     const newDefenderHp = Math.max(0, defender.curHp - finalDamage);
     defender.curHp = newDefenderHp;
-    const isKilled = newDefenderHp === 0;
+
+    // 피격 시 사기 변동 (크리티컬 피격 시 큰 사기 저하, 일반 피격 시 미세 저하)
+    const moraleLoss = isCritical ? 8 : 2;
+    defender.morale = Math.max(0, (defender.morale ?? 100) - moraleLoss);
+    const isKilled = newDefenderHp === 0 || defender.morale === 0;
+    if (defender.morale === 0 && defender.curHp > 0) {
+      defender.curHp = 0; // 사기 0으로 인한 궤멸/퇴각!
+    }
 
     // 경험치 획득 계산 (영걸전 공식)
     let expGained = 8 + Math.floor(Math.random() * 5); // 기본 행동 EXP
@@ -349,6 +362,22 @@ export class BattleEngine {
         isLevelUp,
         isKilled: false
       };
+    } else if (tactic.effectType === 'morale_up') {
+      // 사기 증강계 (고무, 환호)
+      const prevMorale = target.morale ?? 100;
+      target.morale = Math.min(100, prevMorale + tactic.power);
+      const actualGain = target.morale - prevMorale;
+
+      const exp = 10 + Math.floor(Math.random() * 5);
+      const isLevelUp = this.applyExp(caster, exp);
+
+      return {
+        value: actualGain,
+        message: `사기 +${actualGain}!`,
+        expGained: exp,
+        isLevelUp,
+        isKilled: false
+      };
     } else {
       // 공격형 책략 (화계, 수계, 낙석계)
       const intelDiff = caster.intel * 2.2 - target.intel * 1.2;
@@ -388,6 +417,62 @@ export class BattleEngine {
     }
   }
 
+  // 특수 병종(군악대: MP/사기 회복, 수송대: HP 보급) 턴 개시 패시브 효과
+  public static applyTurnPassives(
+    units: BattleUnit[],
+    currentFaction: 'player' | 'enemy'
+  ): { targetUid: string; x: number; y: number; message: string; color: string }[] {
+    const results: { targetUid: string; x: number; y: number; message: string; color: string }[] = [];
+    const activeUnits = units.filter((u) => u.faction === currentFaction && u.curHp > 0);
+
+    for (const unit of activeUnits) {
+      if (unit.classType === 'military_band') {
+        // 군악대: 상하좌우 인접 아군 MP +10 및 사기 +5 회복
+        for (const ally of activeUnits) {
+          if (ally.uid === unit.uid) continue;
+          const dist = Math.abs(ally.x - unit.x) + Math.abs(ally.y - unit.y);
+          if (dist === 1) {
+            const mpDiff = Math.min(10, ally.maxMp - ally.curMp);
+            ally.curMp = Math.min(ally.maxMp, ally.curMp + 10);
+            ally.morale = Math.min(100, (ally.morale ?? 100) + 5);
+            if (mpDiff > 0) {
+              results.push({
+                targetUid: ally.uid,
+                x: ally.x,
+                y: ally.y,
+                message: `🎵 군악대: MP+${mpDiff}`,
+                color: '#38bdf8'
+              });
+            }
+          }
+        }
+      } else if (unit.classType === 'supply_wagon') {
+        // 수송대: 상하좌우 인접 아군 HP 15% 보급
+        for (const ally of activeUnits) {
+          if (ally.uid === unit.uid) continue;
+          const dist = Math.abs(ally.x - unit.x) + Math.abs(ally.y - unit.y);
+          if (dist === 1) {
+            const heal = Math.round(ally.maxHp * 0.15);
+            const prev = ally.curHp;
+            ally.curHp = Math.min(ally.maxHp, ally.curHp + heal);
+            const actual = ally.curHp - prev;
+            if (actual > 0) {
+              results.push({
+                targetUid: ally.uid,
+                x: ally.x,
+                y: ally.y,
+                message: `🚑 수송대: +${actual}`,
+                color: '#4ade80'
+              });
+            }
+          }
+        }
+      }
+    }
+
+    return results;
+  }
+
   // 경험치 누적 및 100 경험치 레벨업 처리
   public static applyExp(unit: BattleUnit, exp: number): boolean {
     if (unit.faction !== 'player') return false; // 플레이어 진영만 레벨업 처리
@@ -411,6 +496,7 @@ export class BattleEngine {
       // 영걸전 특유의 레벨업 즉시 체력/책략치 완전 회복 보너스!
       unit.curHp = unit.maxHp;
       unit.curMp = unit.maxMp;
+      unit.morale = 100;
 
       return true;
     }
@@ -459,6 +545,11 @@ export class BattleEngine {
 
     if (currentTurn > stage.maxTurns) {
       return 'defeat'; // 제한 턴 초과
+    }
+
+    // 탈출 지점 승리 조건 체크 (유비가 escapePoint에 도달했는지 확인)
+    if (stage.escapePoint && liuBei.x === stage.escapePoint.x && liuBei.y === stage.escapePoint.y) {
+      return 'victory';
     }
 
     // 적군 생존 여부

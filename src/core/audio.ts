@@ -503,6 +503,105 @@ class RetroAudioEngine {
       totalDuration += note.d;
     });
   }
+
+  // 사기 고무 팡파르 (환호/고무 책략 발동)
+  public playCheerMorale() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const notes = [440, 554.37, 659.25, 880];
+    notes.forEach((freq, idx) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const st = this.ctx.currentTime + idx * 0.07;
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, st);
+      gain.gain.setValueAtTime(0.18, st);
+      gain.gain.exponentialRampToValueAtTime(0.01, st + 0.1);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(st);
+      osc.stop(st + 0.1);
+    });
+  }
+
+  // 장수 퇴각 쓸쓸한 호른음
+  public playUnitRetreat() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const notes = [440, 415.3, 370, 311.13];
+    notes.forEach((freq, idx) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const st = this.ctx.currentTime + idx * 0.12;
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(freq, st);
+      gain.gain.setValueAtTime(0.15, st);
+      gain.gain.exponentialRampToValueAtTime(0.01, st + 0.16);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(st);
+      osc.stop(st + 0.16);
+    });
+  }
+
+  // 전장/진행상황 저장 성공 챠링음
+  public playSaveSuccess() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const notes = [587.33, 880, 1174.66];
+    notes.forEach((freq, idx) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      const st = this.ctx.currentTime + idx * 0.08;
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, st);
+      gain.gain.setValueAtTime(0.2, st);
+      gain.gain.exponentialRampToValueAtTime(0.01, st + 0.18);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(st);
+      osc.stop(st + 0.18);
+    });
+  }
+
+  // 크리티컬 강격음 (폭발적 타격)
+  public playCriticalHit() {
+    if (this.isMuted) return;
+    this.initContext();
+    if (!this.ctx) return;
+
+    const osc1 = this.ctx.createOscillator();
+    const osc2 = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc1.type = 'sawtooth';
+    osc2.type = 'square';
+    osc1.frequency.setValueAtTime(320, this.ctx.currentTime);
+    osc1.frequency.exponentialRampToValueAtTime(60, this.ctx.currentTime + 0.28);
+    osc2.frequency.setValueAtTime(800, this.ctx.currentTime);
+    osc2.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.28);
+
+    gain.gain.setValueAtTime(0.35, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.28);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc1.start();
+    osc2.start();
+    osc1.stop(this.ctx.currentTime + 0.28);
+    osc2.stop(this.ctx.currentTime + 0.28);
+  }
 }
 
 export const soundManager = new RetroAudioEngine();

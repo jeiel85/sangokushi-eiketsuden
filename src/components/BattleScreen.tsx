@@ -10,26 +10,30 @@ import { CHARACTERS } from '../data/characters';
 import { TERRAINS, UNIT_CLASSES } from '../data/classes';
 import { ITEMS } from '../data/items';
 import { TACTICS } from '../data/tactics';
-import type { BattleUnit, DuelDef, StageDef } from '../types/game';
+import type { BattleSaveData, BattleUnit, DuelDef, StageDef } from '../types/game';
 import { DuelModal } from './DuelModal';
 import { UnitDetailModal } from './UnitDetailModal';
 
 interface BattleScreenProps {
   stage: StageDef;
   playerUnits: BattleUnit[];
+  savedBattleState?: BattleSaveData | null;
   onLootTreasure?: (itemId: string, gold?: number) => void;
   onVictory: (clearedStageId: number, rewardGold: number, rewardExp: number) => void;
   onDefeat: () => void;
   onRetreat: () => void;
+  onSaveBattle?: (saveData: BattleSaveData) => void;
 }
 
 export const BattleScreen: React.FC<BattleScreenProps> = ({
   stage,
   playerUnits,
+  savedBattleState,
   onLootTreasure,
   onVictory,
   onDefeat,
-  onRetreat
+  onRetreat,
+  onSaveBattle
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rendererRef = useRef<GameRenderer>(new GameRenderer(48));
@@ -43,6 +47,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const [attackableTiles, setAttackableTiles] = useState<{ x: number; y: number }[]>([]);
   const [activeActionMenu, setActiveActionMenu] = useState<'root' | 'tactics' | 'items' | null>(null);
   const [selectedTacticId, setSelectedTacticId] = useState<string | null>(null);
+  const [selectedItemIdx, setSelectedItemIdx] = useState<number | null>(null);
   const [hoveredTile, setHoveredTile] = useState<{ x: number; y: number } | null>(null);
   const [unitOriginalPos, setUnitOriginalPos] = useState<{ x: number; y: number } | null>(null);
   const [claimedTreasures, setClaimedTreasures] = useState<Set<string>>(new Set());
@@ -63,11 +68,25 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const [floaters, setFloaters] = useState<DamageFloater[]>([]);
   const [effects, setEffects] = useState<AnimationEffect[]>([]);
 
-  // 초기 유닛 배치
+  // 초기 유닛 배치 및 중간 저장 복원
   useEffect(() => {
     soundManager.playBgm('battle');
 
-    const combinedUnits: BattleUnit[] = [...playerUnits];
+    // 전장 중간 저장 데이터가 있는 경우 상태 즉시 복원
+    if (savedBattleState && savedBattleState.stageId === stage.id) {
+      setCurrentTurn(savedBattleState.currentTurn);
+      setPhase(savedBattleState.phase);
+      setWeather(savedBattleState.weather);
+      setUnits(savedBattleState.units);
+      setClaimedTreasures(new Set(savedBattleState.claimedTreasures));
+      setDialogueCutscene(null);
+      return;
+    }
+
+    const combinedUnits: BattleUnit[] = playerUnits.map((pu) => ({
+      ...pu,
+      morale: pu.morale ?? 100
+    }));
 
     // 스테이지 정의에 따른 적군 및 아군 NPC 배치
     stage.initialDeployments.forEach((dep, idx) => {
@@ -108,7 +127,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           status: 'normal',
           equippedItems: charDef.initialItems || [],
           tactics: charDef.initialTactics || ['pyro_1'],
-          isCommander: dep.isCommander
+          isCommander: dep.isCommander,
+          morale: 100
         });
       }
     });
@@ -121,7 +141,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     } else {
       setDialogueCutscene(null);
     }
-  }, [stage, playerUnits]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage.id, savedBattleState]);
 
   // 플로팅 데미지 추가 헬퍼
   const addFloater = (x: number, y: number, text: string, color: string = '#ef4444') => {
@@ -218,7 +239,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
     if (phase !== 'player') return;
 
-    // 1. 공격 / 책략 타겟 선택 상태인 경우
+    // 1. 공격 / 책략 / 도구 타겟 선택 상태인 경우
     if (attackableTiles.length > 0) {
       const isTargetTile = attackableTiles.some((t) => t.x === tileX && t.y === tileY);
       if (isTargetTile) {
@@ -226,19 +247,26 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         const attacker = units.find((u) => u.uid === selectedUnitId);
 
         if (attacker && targetUnit) {
-          if (selectedTacticId) {
+          if (selectedItemIdx !== null) {
+            handleExecuteItem(attacker, targetUnit, selectedItemIdx);
+            setUnitOriginalPos(null);
+            return;
+          } else if (selectedTacticId) {
             handleExecuteTactic(attacker, targetUnit, selectedTacticId);
+            setUnitOriginalPos(null);
+            return;
           } else {
             handleExecuteAttack(attacker, targetUnit);
+            setUnitOriginalPos(null);
+            return;
           }
-          setUnitOriginalPos(null);
-          return;
         }
       }
-      // 공격 취소 및 메뉴 복귀
+      // 공격 / 책략 / 도구 대상 선택 취소 및 메뉴 복귀
       soundManager.playMenuCancel();
       setAttackableTiles([]);
       setSelectedTacticId(null);
+      setSelectedItemIdx(null);
       setActiveActionMenu('root');
       return;
     }
@@ -340,7 +368,70 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     setActiveActionMenu(null);
     setAttackableTiles([]);
     setSelectedTacticId(null);
+    setSelectedItemIdx(null);
     setUnitOriginalPos(null);
+  };
+
+  // 도구 아이템 사용 (자신 또는 인접 아군 부대 치유/보급)
+  const handleExecuteItem = (user: BattleUnit, target: BattleUnit, itemIndex: number) => {
+    const itemId = user.equippedItems[itemIndex];
+    const item = ITEMS[itemId];
+    if (!item) return;
+
+    soundManager.playMagicHeal();
+    addEffect(target.x, target.y, 'heal');
+
+    if (item.hpRestore) {
+      const prevHp = target.curHp;
+      target.curHp = Math.min(target.maxHp, target.curHp + item.hpRestore);
+      const diff = target.curHp - prevHp;
+      addFloater(target.x, target.y, `+${diff} (HP 회복)`, '#22c55e');
+    }
+    if (item.mpRestore) {
+      const prevMp = target.curMp;
+      target.curMp = Math.min(target.maxMp, target.curMp + item.mpRestore);
+      const diff = target.curMp - prevMp;
+      addFloater(target.x, target.y, `+${diff} (MP 회복)`, '#38bdf8');
+    }
+    if (item.cureStatus) {
+      target.status = 'normal';
+      addFloater(target.x, target.y, '상태 정상화!', '#22c55e');
+    }
+
+    user.equippedItems.splice(itemIndex, 1);
+    const isLevelUp = BattleEngine.applyExp(user, 8);
+    if (isLevelUp) {
+      soundManager.playLevelUp();
+      addFloater(user.x, user.y, '⭐ 레벨업!', '#3b82f6');
+    }
+
+    user.hasActed = true;
+    setUnits([...units]);
+    setAttackableTiles([]);
+    setSelectedItemIdx(null);
+    setActiveActionMenu(null);
+    setSelectedUnitId(null);
+    setUnitOriginalPos(null);
+  };
+
+  // 전장 실시간 중간 저장
+  const handleSaveBattleState = () => {
+    soundManager.playSaveSuccess();
+    const saveData: BattleSaveData = {
+      stageId: stage.id,
+      currentTurn,
+      phase,
+      weather,
+      units: [...units],
+      claimedTreasures: Array.from(claimedTreasures),
+      timestamp: Date.now()
+    };
+    localStorage.setItem('samguk_hero_battlesave_v1', JSON.stringify(saveData));
+    if (onSaveBattle) {
+      onSaveBattle(saveData);
+    }
+    const unitPos = selectedUnit ? selectedUnit : { x: 1, y: 1 };
+    addFloater(unitPos.x, unitPos.y, '💾 전장 저장 완료!', '#38bdf8');
   };
 
   // 일반 물리 공격 실행
@@ -368,7 +459,23 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
     setTimeout(() => {
       soundManager.playHitImpact();
-      addFloater(defender.x, defender.y, `-${result.damage}`, result.isCritical ? '#fbbf24' : '#ef4444');
+      if (result.isCritical) {
+        soundManager.playCriticalHit();
+        addFloater(defender.x, defender.y, `-${result.damage} (회심의 일격!)`, '#fbbf24');
+      } else {
+        addFloater(defender.x, defender.y, `-${result.damage}`, '#ef4444');
+      }
+
+      if (result.isKilled) {
+        soundManager.playUnitRetreat();
+        if (defender.faction === 'player') {
+          if (defender.charId !== 'liu_bei') {
+            addFloater(defender.x, defender.y, `[${defender.name}] "분하다... 퇴각한다!"`, '#ef4444');
+          }
+        } else {
+          addFloater(defender.x, defender.y, `[${defender.name}] 퇴각!`, '#f97316');
+        }
+      }
 
       if (result.isLevelUp) {
         soundManager.playLevelUp();
@@ -420,6 +527,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
       addEffect(target.x, target.y, 'water');
     } else if (tactic?.category === 'recovery') {
       soundManager.playMagicHeal();
+      addEffect(target.x, target.y, 'heal');
+    } else if (tactic?.category === 'support') {
+      soundManager.playCheerMorale();
       addEffect(target.x, target.y, 'heal');
     }
 
@@ -515,8 +625,8 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
         setWeather(nextWeather);
 
         // 모든 아군 및 적군 행동 플래그 리셋 & 지형 회복 적용
-        setUnits((prev) =>
-          prev.map((u) => {
+        setUnits((prev) => {
+          const next = prev.map((u) => {
             if (u.curHp <= 0) return u;
             const terrain = stage.mapData[u.y][u.x];
             const healRatio = TERRAINS[terrain]?.healPerTurn || 0;
@@ -530,8 +640,19 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
               curHp: healedHp,
               hasActed: false
             };
-          })
-        );
+          });
+
+          // 군악대 및 수송대 고유 턴 패시브 적용
+          const passives = BattleEngine.applyTurnPassives(next, 'player');
+          passives.forEach((p) => {
+            addFloater(p.x, p.y, p.message, p.color);
+          });
+          if (passives.some((p) => p.message.includes('군악대'))) {
+            soundManager.playCheerMorale();
+          }
+
+          return next;
+        });
         return;
       }
 
@@ -600,12 +721,20 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
 
         <div className="flex items-center gap-2">
           {phase === 'player' && (
-            <button
-              onClick={handleEndPlayerPhase}
-              className="rounded bg-amber-600 px-3 py-1 text-xs font-bold text-slate-950 hover:bg-amber-500 active:scale-95 transition shadow"
-            >
-              턴 종료 ▶
-            </button>
+            <>
+              <button
+                onClick={handleSaveBattleState}
+                className="rounded bg-indigo-900 border border-indigo-400 px-3 py-1 text-xs font-bold text-indigo-200 hover:bg-indigo-800 active:scale-95 transition shadow"
+              >
+                💾 전장 저장
+              </button>
+              <button
+                onClick={handleEndPlayerPhase}
+                className="rounded bg-amber-600 px-3 py-1 text-xs font-bold text-slate-950 hover:bg-amber-500 active:scale-95 transition shadow"
+              >
+                턴 종료 ▶
+              </button>
+            </>
           )}
           <button
             onClick={() => {
@@ -642,7 +771,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
           style={{ imageRendering: 'pixelated' }}
         />
 
-        {/* 공격/책략 타겟 선택 중일 때 상단 취소 버튼 */}
+        {/* 공격/책략/도구 타겟 선택 중일 때 상단 취소 버튼 */}
         {attackableTiles.length > 0 && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-40">
             <button
@@ -650,11 +779,12 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
                 soundManager.playMenuCancel();
                 setAttackableTiles([]);
                 setSelectedTacticId(null);
+                setSelectedItemIdx(null);
                 setActiveActionMenu('root');
               }}
               className="rounded-full bg-red-900/90 border-2 border-red-500 px-4 py-1.5 text-xs font-bold text-white shadow-xl hover:bg-red-800 active:scale-95 transition"
             >
-              ↩️ {selectedTacticId ? '책략 대상 선택 취소' : '공격 대상 선택 취소'}
+              ↩️ {selectedItemIdx !== null ? '도구 대상 선택 취소' : selectedTacticId ? '책략 대상 선택 취소' : '공격 대상 선택 취소'}
             </button>
           </div>
         )}
@@ -784,8 +914,13 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
                           stage.width,
                           stage.height
                         );
+                        // 지원/회복 책략은 시전자 본인 타일도 포함
+                        if (tactic.effectType === 'heal' || tactic.effectType === 'morale_up' || tactic.effectType === 'cure') {
+                          targets.push({ x: selectedUnit.x, y: selectedUnit.y });
+                        }
                         setAttackableTiles(targets);
                         setSelectedTacticId(tId);
+                        setSelectedItemIdx(null);
                         setActiveActionMenu(null);
                       }}
                       className="flex items-center justify-between rounded bg-slate-900 hover:bg-indigo-900/80 p-2 text-xs transition disabled:opacity-40"
@@ -804,7 +939,7 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
               </div>
             )}
 
-            {/* 도구 서브메뉴 */}
+            {/* 도구 서브메뉴 (자신 및 인접 아군 지정 사용) */}
             {activeActionMenu === 'items' && (
               <div className="flex flex-col gap-1 w-44 max-h-48 overflow-y-auto">
                 {selectedUnit.equippedItems.map((itemId, idx) => {
@@ -815,21 +950,26 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
                     <button
                       key={idx}
                       onClick={() => {
-                        soundManager.playMagicHeal();
-                        if (item.hpRestore) {
-                          selectedUnit.curHp = Math.min(selectedUnit.maxHp, selectedUnit.curHp + item.hpRestore);
-                          addFloater(selectedUnit.x, selectedUnit.y, `+${item.hpRestore} 회복!`, '#22c55e');
-                        }
-                        if (item.cureStatus) {
-                          selectedUnit.status = 'normal';
-                          addFloater(selectedUnit.x, selectedUnit.y, '상태 정상화!', '#22c55e');
-                        }
-                        // 소모품 1개 제거
-                        selectedUnit.equippedItems.splice(idx, 1);
-                        selectedUnit.hasActed = true;
-                        setUnits([...units]);
+                        soundManager.playMenuClick();
+                        // 인접 4방향 및 본인 타일 중 생존 아군 위치만 대상 선정
+                        const candidateTiles = [
+                          { x: selectedUnit.x, y: selectedUnit.y },
+                          { x: selectedUnit.x + 1, y: selectedUnit.y },
+                          { x: selectedUnit.x - 1, y: selectedUnit.y },
+                          { x: selectedUnit.x, y: selectedUnit.y + 1 },
+                          { x: selectedUnit.x, y: selectedUnit.y - 1 }
+                        ].filter(
+                          (t) =>
+                            t.x >= 0 &&
+                            t.x < stage.width &&
+                            t.y >= 0 &&
+                            t.y < stage.height &&
+                            units.some((u) => u.x === t.x && u.y === t.y && u.faction === 'player' && u.curHp > 0)
+                        );
+                        setAttackableTiles(candidateTiles);
+                        setSelectedItemIdx(idx);
+                        setSelectedTacticId(null);
                         setActiveActionMenu(null);
-                        setSelectedUnitId(null);
                       }}
                       className="flex items-center justify-between rounded bg-slate-900 hover:bg-emerald-900/80 p-2 text-xs transition"
                     >
@@ -867,11 +1007,12 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
                     {UNIT_CLASSES[selectedUnit.classType]?.name}
                   </span>
                 </div>
-                <div className="flex gap-4 text-[11px]">
+                <div className="flex gap-3 text-[11px]">
                   <span>HP: <strong className="text-green-400">{selectedUnit.curHp}/{selectedUnit.maxHp}</strong></span>
                   <span>MP: <strong className="text-cyan-400">{selectedUnit.curMp}/{selectedUnit.maxMp}</strong></span>
-                  <span>공격: <strong className="text-orange-400">{selectedUnit.attack}</strong></span>
-                  <span>방어: <strong className="text-teal-400">{selectedUnit.defense}</strong></span>
+                  <span>사기: <strong className="text-yellow-400">{selectedUnit.morale ?? 100}</strong></span>
+                  <span>공: <strong className="text-orange-400">{selectedUnit.attack}</strong></span>
+                  <span>방: <strong className="text-teal-400">{selectedUnit.defense}</strong></span>
                 </div>
               </div>
             </>

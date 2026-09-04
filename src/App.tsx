@@ -1,6 +1,6 @@
 // 삼국지 영걸전 웹앱 메인 애플리케이션
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { BattleScreen } from './components/BattleScreen';
 import { DeploymentModal } from './components/DeploymentModal';
 import { EquipModal } from './components/EquipModal';
@@ -12,9 +12,10 @@ import { UnitDetailModal } from './components/UnitDetailModal';
 import { soundManager } from './core/audio';
 import { CHARACTERS } from './data/characters';
 import { STAGES } from './data/stages';
-import type { BattleUnit, GameState, UnitClassType } from './types/game';
+import type { BattleSaveData, BattleUnit, GameState, UnitClassType } from './types/game';
 
 const SAVE_KEY = 'samguk_hero_save_v1';
+const BATTLE_SAVE_KEY = 'samguk_hero_battlesave_v1';
 
 // 초기 촉한 장수 로스터 생성
 function createInitialGameState(): GameState {
@@ -24,6 +25,7 @@ function createInitialGameState(): GameState {
     isCheatedLevel99: false,
     clearedStages: [],
     inventory: ['bean', 'bean', 'rice', 'meat', 'wine', 'manual_sword'],
+    battleSave: null,
     roster: [
       {
         charId: 'liu_bei',
@@ -38,7 +40,8 @@ function createInitialGameState(): GameState {
         intel: 78,
         lead: 99,
         equippedItems: ['twin_swords', 'rice'],
-        tactics: ['cheer_1', 'heal_1']
+        tactics: ['cheer_1', 'heal_1'],
+        morale: 100
       },
       {
         charId: 'guan_yu',
@@ -53,7 +56,8 @@ function createInitialGameState(): GameState {
         intel: 84,
         lead: 98,
         equippedItems: ['green_dragon', 'meat'],
-        tactics: ['cheer_1', 'pyro_1']
+        tactics: ['cheer_1', 'pyro_1'],
+        morale: 100
       },
       {
         charId: 'zhang_fei',
@@ -68,7 +72,8 @@ function createInitialGameState(): GameState {
         intel: 45,
         lead: 85,
         equippedItems: ['serpent_spear', 'wine'],
-        tactics: ['cheer_1']
+        tactics: ['cheer_1'],
+        morale: 100
       },
       {
         charId: 'jian_yong',
@@ -83,7 +88,8 @@ function createInitialGameState(): GameState {
         intel: 76,
         lead: 72,
         equippedItems: ['repeater_bow', 'bean'],
-        tactics: ['cheer_1', 'heal_1']
+        tactics: ['cheer_1', 'heal_1'],
+        morale: 100
       },
       {
         charId: 'fan_gong',
@@ -98,7 +104,8 @@ function createInitialGameState(): GameState {
         intel: 62,
         lead: 74,
         equippedItems: ['meat'],
-        tactics: ['cheer_1']
+        tactics: ['cheer_1'],
+        morale: 100
       },
       {
         charId: 'zhao_yun',
@@ -113,7 +120,8 @@ function createInitialGameState(): GameState {
         intel: 86,
         lead: 96,
         equippedItems: ['iron_spear'],
-        tactics: ['cheer_1', 'pyro_1']
+        tactics: ['cheer_1', 'pyro_1'],
+        morale: 100
       },
       {
         charId: 'zhuge_liang',
@@ -128,7 +136,8 @@ function createInitialGameState(): GameState {
         intel: 100,
         lead: 98,
         equippedItems: ['art_of_war'],
-        tactics: ['pyro_1', 'pyro_2', 'water_1', 'water_2', 'confuse_1', 'heal_2']
+        tactics: ['pyro_1', 'pyro_2', 'water_1', 'water_2', 'confuse_1', 'heal_2'],
+        morale: 100
       },
       {
         charId: 'huang_zhong',
@@ -143,7 +152,8 @@ function createInitialGameState(): GameState {
         intel: 68,
         lead: 90,
         equippedItems: ['repeater_bow', 'meat'],
-        tactics: ['cheer_1', 'pyro_1']
+        tactics: ['cheer_1', 'pyro_1'],
+        morale: 100
       },
       {
         charId: 'wei_yan',
@@ -158,7 +168,8 @@ function createInitialGameState(): GameState {
         intel: 72,
         lead: 85,
         equippedItems: ['iron_sword'],
-        tactics: ['cheer_1', 'rock_1']
+        tactics: ['cheer_1', 'rock_1'],
+        morale: 100
       }
     ]
   };
@@ -178,11 +189,17 @@ export function App() {
 
   // 로컬 저장 데이터 확인
   const [hasSavedGame, setHasSavedGame] = useState(false);
+  const [hasBattleSave, setHasBattleSave] = useState(false);
+  const [activeBattleSave, setActiveBattleSave] = useState<BattleSaveData | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem(SAVE_KEY);
     if (saved) {
       setHasSavedGame(true);
+    }
+    const battleSaved = localStorage.getItem(BATTLE_SAVE_KEY);
+    if (battleSaved) {
+      setHasBattleSave(true);
     }
   }, []);
 
@@ -193,7 +210,7 @@ export function App() {
     alert('게임 진행 상황이 브라우저에 안전하게 저장되었습니다!');
   };
 
-  // 게임 이어하기
+  // 거점 이어하기
   const handleContinueGame = () => {
     const saved = localStorage.getItem(SAVE_KEY);
     if (saved) {
@@ -204,6 +221,22 @@ export function App() {
         soundManager.playBgm('town');
       } catch {
         alert('저장 데이터를 불러오는 데 실패했습니다.');
+      }
+    }
+  };
+
+  // 전장 중간 저장 이어하기
+  const handleContinueBattle = () => {
+    const saved = localStorage.getItem(BATTLE_SAVE_KEY);
+    if (saved) {
+      try {
+        const parsed: BattleSaveData = JSON.parse(saved);
+        setActiveBattleSave(parsed);
+        setGameState((prev) => ({ ...prev, currentStageId: parsed.stageId }));
+        setScreenMode('battle');
+        soundManager.playBgm('battle');
+      } catch {
+        alert('전장 저장 데이터를 불러오는 데 실패했습니다.');
       }
     }
   };
@@ -238,6 +271,7 @@ export function App() {
       maxHp: 999,
       curMp: 255,
       maxMp: 255,
+      morale: 100,
       war: Math.min(100, hero.war + 20),
       intel: Math.min(100, hero.intel + 20),
       lead: Math.min(100, hero.lead + 20),
@@ -295,6 +329,10 @@ export function App() {
 
   // 전투 승리 시
   const handleBattleVictory = (clearedStageId: number, rewardGold: number, rewardExp: number) => {
+    localStorage.removeItem(BATTLE_SAVE_KEY);
+    setHasBattleSave(false);
+    setActiveBattleSave(null);
+
     setGameState((prev) => {
       const nextStageId = Math.min(STAGES.length, clearedStageId + 1);
       const updatedRoster = prev.roster.map((hero) => {
@@ -304,7 +342,8 @@ export function App() {
             ...hero,
             exp: hero.exp + rewardExp,
             curHp: hero.maxHp,
-            curMp: hero.maxMp
+            curMp: hero.maxMp,
+            morale: 100
           };
         }
         return hero;
@@ -325,6 +364,9 @@ export function App() {
 
   // 전투 패배 시
   const handleBattleDefeat = () => {
+    localStorage.removeItem(BATTLE_SAVE_KEY);
+    setHasBattleSave(false);
+    setActiveBattleSave(null);
     setScreenMode('town');
     soundManager.playBgm('town');
   };
@@ -366,7 +408,8 @@ export function App() {
         status: 'normal',
         equippedItems: hero?.equippedItems || [],
         tactics: hero?.tactics || ['cheer_1', 'pyro_1'],
-        isCommander: charId === 'liu_bei'
+        isCommander: charId === 'liu_bei',
+        morale: hero?.morale ?? 100
       };
     });
   };
@@ -385,6 +428,11 @@ export function App() {
     });
   };
 
+  const playerBattleUnits = useMemo(() => {
+    return generatePlayerBattleUnits();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDeployChars, gameState.roster]);
+
   return (
     <div className="h-screen w-screen bg-black font-sans text-slate-100 flex flex-col items-center justify-center">
       {/* 1. 타이틀 화면 */}
@@ -392,8 +440,10 @@ export function App() {
         <TitleScreen
           onStartGame={handleStartNewGame}
           onContinueGame={handleContinueGame}
+          onContinueBattle={handleContinueBattle}
           onOpenStageSelect={() => setIsStageSelectOpen(true)}
           hasSavedGame={hasSavedGame}
+          hasBattleSave={hasBattleSave}
           onActivateLevel99Cheat={handleActivateLevel99Cheat}
           isCheated={gameState.isCheatedLevel99}
         />
@@ -417,14 +467,19 @@ export function App() {
       {screenMode === 'battle' && (
         <BattleScreen
           stage={currentStage}
-          playerUnits={generatePlayerBattleUnits()}
+          playerUnits={playerBattleUnits}
+          savedBattleState={activeBattleSave}
           onLootTreasure={handleLootTreasure}
           onVictory={handleBattleVictory}
           onDefeat={handleBattleDefeat}
           onRetreat={() => {
+            localStorage.removeItem(BATTLE_SAVE_KEY);
+            setHasBattleSave(false);
+            setActiveBattleSave(null);
             setScreenMode('town');
             soundManager.playBgm('town');
           }}
+          onSaveBattle={() => setHasBattleSave(true)}
         />
       )}
 

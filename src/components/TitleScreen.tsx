@@ -6,8 +6,10 @@ import { soundManager } from '../core/audio';
 interface TitleScreenProps {
   onStartGame: () => void;
   onContinueGame: () => void;
+  onContinueBattle?: () => void;
   onOpenStageSelect: () => void;
   hasSavedGame: boolean;
+  hasBattleSave?: boolean;
   onActivateLevel99Cheat: () => void;
   isCheated: boolean;
 }
@@ -15,8 +17,10 @@ interface TitleScreenProps {
 export const TitleScreen: React.FC<TitleScreenProps> = ({
   onStartGame,
   onContinueGame,
+  onContinueBattle,
   onOpenStageSelect,
   hasSavedGame,
+  hasBattleSave,
   onActivateLevel99Cheat,
   isCheated
 }) => {
@@ -54,7 +58,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
           <span className="rounded border border-amber-600/80 bg-amber-950/80 px-2.5 py-1 text-xs font-bold text-amber-300">
             KOEI 1995 RECREATION
           </span>
-          <span className="text-xs text-slate-400">웹 브라우저 99% 재현 에디션</span>
+          <span className="text-xs text-slate-400">웹 브라우저 100% 완전 재현 에디션</span>
         </div>
         <button
           onClick={toggleSound}
@@ -122,6 +126,18 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
             새로운 천하 통일 시작 ⚔️
           </button>
 
+          {hasBattleSave && onContinueBattle && (
+            <button
+              onClick={() => {
+                soundManager.playMenuClick();
+                onContinueBattle();
+              }}
+              className="rounded border-2 border-indigo-500 bg-indigo-950/80 px-6 py-3 text-base font-bold text-indigo-200 hover:bg-indigo-900 active:scale-95 transition shadow-lg animate-pulse"
+            >
+              전투 이어하기 (전장 저장) ⚔️
+            </button>
+          )}
+
           {hasSavedGame && (
             <button
               onClick={() => {
@@ -130,7 +146,7 @@ export const TitleScreen: React.FC<TitleScreenProps> = ({
               }}
               className="rounded border-2 border-blue-600 bg-slate-900 px-6 py-3 text-base font-bold text-blue-200 hover:bg-slate-850 active:scale-95 transition"
             >
-              이어하기 (저장 데이터) 💾
+              거점 이어하기 (본영 저장) 💾
             </button>
           )}
 
