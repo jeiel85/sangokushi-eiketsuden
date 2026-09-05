@@ -516,6 +516,9 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
     );
 
     if (duelMatch) {
+      // 일기토는 공격자의 행동을 소모함 (자동사냥 경로와 동일하게 처리)
+      attacker.hasActed = true;
+      setUnits([...units]);
       setActiveDuel(duelMatch);
       setAttackableTiles([]);
       setActiveActionMenu(null);
@@ -661,10 +664,12 @@ export const BattleScreen: React.FC<BattleScreenProps> = ({
   const handleDuelComplete = () => {
     if (activeDuel) {
       if (activeDuel.enemyRetreats) {
-        // 적장 퇴각 처리
-        setUnits((prev) =>
-          prev.map((u) => (u.charId === activeDuel.enemyCharId ? { ...u, curHp: 0 } : u))
+        // 적장 퇴각 처리 — unitsRef도 즉시 동기화하여 승패 판정이 stale 상태를 읽지 않도록 함
+        const updated = unitsRef.current.map((u) =>
+          u.charId === activeDuel.enemyCharId ? { ...u, curHp: 0 } : u
         );
+        unitsRef.current = updated;
+        setUnits(updated);
       }
       // 플레이어에게 보너스 경험치 지급
       const playerUnit = unitsRef.current.find((u) => u.charId === activeDuel.playerCharId);
